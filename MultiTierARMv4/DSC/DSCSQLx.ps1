@@ -508,11 +508,9 @@ break
 # F5 loads the script
 
 #$Cred = get-credential LocalAdmin
-# FNF 
-$SAK = 'SmABTRmWeJ12VkpKCEBqTz8YbLcOiClh+ZZitgGPjYMN5JQjxtBhs+jgGUN/YXljTNnC/tS/Anhi9Ea6Mu/N1g=='
 
 # BRW
-$SAK = 'kBvS3pFQ7KozYtSnezXsTukLTSUkGLxf+PfjLVhXLecTC151FhtHhIrIomCUiY24JWeE9zQWNc1mSSZEjjrPVA=='
+$SAK = 'sdfasdfasdffffffffffffffffffffffffffffffff'
 # main -ConfigurationData .\ConfigurationDataSQLx.psd1 -AdminCreds $cred -Verbose -StorageAccountKeySource $sak 
 main -ConfigurationData .\ConfigurationDataSQL1.psd1 -AdminCreds $cred -Verbose -StorageAccountKeySource $sak 
 

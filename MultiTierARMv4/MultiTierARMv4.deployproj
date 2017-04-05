@@ -39,6 +39,11 @@
     <Content Include="6-azuredeploy-ILBalancer.json" />
     <Content Include="4.5-azuredeploy-VMPrivate.json" />
     <Content Include="4.5-azuredeploy-VMPublic.json" />
+    <Content Include="DSC\DSCAppTier.ps1" />
+    <None Include="DSC\TESTAGENT-ConfigurationData.psd1" />
+    <None Include="DSC\WebMT-ConfigurationData.psd1" />
+    <None Include="DSC\WebFE-ConfigurationData.psd1" />
+    <None Include="DSC\JMP-ConfigurationData.psd1" />
     <None Include="PrereqsToDeploy\CreateKeyVaultAndStoreSecrets.ps1" />
     <None Include="PrereqsToDeploy\CreateUploadCertificatestoKeyVault.ps1" />
     <None Include="Deployment.targets">

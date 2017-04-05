@@ -160,6 +160,9 @@
     },
     "OMSKey": {
       "type": "securestring"
+    },
+    "OMSID": {
+      "type": "securestring"
     }
   },
   "variables": {
@@ -205,11 +208,7 @@
     "ConfigDataPath": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/')]",
 
     //Nested Templates
-    "NestedTemplateFolder": "nestedtemplates",
-
-    //OMS Info
-    "OMSworkspaceId": "8528163b-1b52-46f4-946b-56f136832e4d",
-    "OMSworkspaceKey": "[parameters('OMSKey')]"
+    "NestedTemplateFolder": "nestedtemplates"
 
   },
   "resources": [
@@ -431,10 +430,10 @@
             "typeHandlerVersion": "1.0",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "workspaceId": "[variables('OMSworkspaceId')]"
+              "workspaceId": "[parameters('OMSId')]"
             },
             "protectedSettings": {
-              "workspaceKey": "[variables('OMSworkspaceKey')]"
+              "workspaceKey": "[parameters('OMSKey')]"
             }
           }
         }
