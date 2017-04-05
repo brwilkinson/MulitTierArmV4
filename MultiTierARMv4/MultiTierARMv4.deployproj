@@ -40,10 +40,10 @@
     <Content Include="4.5-azuredeploy-VMPrivate.json" />
     <Content Include="4.5-azuredeploy-VMPublic.json" />
     <Content Include="DSC\DSCAppTier.ps1" />
-    <None Include="DSC\TESTAGENT-ConfigurationData.psd1" />
-    <None Include="DSC\WebMT-ConfigurationData.psd1" />
-    <None Include="DSC\WebFE-ConfigurationData.psd1" />
-    <None Include="DSC\JMP-ConfigurationData.psd1" />
+    <Content Include="DSC\TESTAGENT-ConfigurationData.psd1" />
+    <Content Include="DSC\WebMT-ConfigurationData.psd1" />
+    <Content Include="DSC\WebFE-ConfigurationData.psd1" />
+    <Content Include="DSC\JMP-ConfigurationData.psd1" />
     <None Include="PrereqsToDeploy\CreateKeyVaultAndStoreSecrets.ps1" />
     <None Include="PrereqsToDeploy\CreateUploadCertificatestoKeyVault.ps1" />
     <None Include="Deployment.targets">
@@ -59,4 +59,9 @@
     <None Include="ReadMe-DeploymentFeatures.md" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties _x0034_-azuredeploy-MidTier_1json__JSONSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

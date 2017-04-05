@@ -244,30 +244,12 @@ Node $AllNodes.NodeName
 	# If you have multiple Availability groups for SQL, they need to run on different ports
 	# e.g. 1433,1434,1435
 	# e.g. 59999,59998,59997
-	xFirewall ProbePort59999
+	xFirewall ProbePorts
     {
-        Name = 'ProbePort'
+        Name = 'ProbePorts'
         Action = 'Allow'
         Direction = 'Inbound'
-        LocalPort = 59999
-        Protocol = 'TCP'
-    }
-
-	xFirewall ProbePort59998
-    {
-        Name = 'ProbePort'
-        Action = 'Allow'
-        Direction = 'Inbound'
-        LocalPort = 59998
-        Protocol = 'TCP'
-    }
-
-	xFirewall ProbePort59997
-    {
-        Name = 'ProbePort'
-        Action = 'Allow'
-        Direction = 'Inbound'
-        LocalPort = 59997
+        LocalPort = 59999,59998,59997
         Protocol = 'TCP'
     }
 
