@@ -173,18 +173,13 @@
     "resourceGroupName": "[resourceGroup().name]",
 
      "AppRoles":  [
-        {"Role" : "NACPJMP", "StorageType" : "Standard_LRS" },
+        {"Role" : "JMP", "StorageType" : "Standard_LRS" },
         {"Role" : "TESTAGENT", "StorageType" : "Standard_LRS" }
      ],
     "AppServers":  [
-         {"VMName":"TESTMSCONTROL1","Role":"TESTAGENT","VMSize":"Standard_DS13","Subnet":"TEST","PublicIPType": "Static"},
-          {"VMName":"TESTMSADMIN1","Role":"TESTAGENT","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
-          {"VMName":"TESTMSDEV1","Role":"TESTAGENT","VMSize":"Standard_DS4","Subnet":"TEST","PublicIPType": "Static"},
-          {"VMName":"NACPJMP2","Role":"NACPJMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
-          {"VMName":"NACPJMP3","Role":"NACPJMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
-          {"VMName":"NACPJMP4","Role":"NACPJMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
-          {"VMName":"NACPJMP5","Role":"NACPJMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
-          {"VMName":"NACPJMP6","Role":"NACPJMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"}
+         {"VMName":"MSCONTROL01","Role":"TESTAGENT","VMSize":"Standard_DS13","Subnet":"TEST","PublicIPType": "Static"},
+          {"VMName":"NAJMP01","Role":"JMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"},
+          {"VMName":"NAJMP02","Role":"JMP","VMSize":"Standard_DS2_V2","Subnet":"FE","PublicIPType": "Static"}
       ],
 
     // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead

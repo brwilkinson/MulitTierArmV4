@@ -191,6 +191,7 @@ Node $AllNodes.NodeName
         Features            = $Node.SQLFeatures
         SQLSysAdminAccounts = $SQLSvcAccount,$Node.AdminAccount
         SQLSvcAccount       = $SQLSvcAccountCreds
+		AgtSvcAccount       = $SQLSvcAccountCreds
         InstallSharedDir    = "F:\Program Files\Microsoft SQL Server"
         InstallSharedWOWDir = "F:\Program Files (x86)\Microsoft SQL Server"
         InstanceDir         = "F:\Program Files\Microsoft SQL Server"
@@ -245,12 +246,29 @@ Node $AllNodes.NodeName
 	# e.g. 59999,59998,59997
 	xFirewall ProbePort59999
     {
-        Name = 'ProbePorts'
+        Name = 'ProbePort'
         Action = 'Allow'
         Direction = 'Inbound'
-        LocalPort = 59999,59998,59997
+        LocalPort = 59999
         Protocol = 'TCP'
-        Profile = 'Domain','Private'
+    }
+
+	xFirewall ProbePort59998
+    {
+        Name = 'ProbePort'
+        Action = 'Allow'
+        Direction = 'Inbound'
+        LocalPort = 59998
+        Protocol = 'TCP'
+    }
+
+	xFirewall ProbePort59997
+    {
+        Name = 'ProbePort'
+        Action = 'Allow'
+        Direction = 'Inbound'
+        LocalPort = 59997
+        Protocol = 'TCP'
     }
 
 	xFirewall SQLPorts
@@ -490,11 +508,9 @@ break
 # F5 loads the script
 
 #$Cred = get-credential LocalAdmin
-# FNF 
-$SAK = 'SmABTRmWeJ12VkpKCEBqTz8YbLcOiClh+ZZitgGPjYMN5JQjxtBhs+jgGUN/YXljTNnC/tS/Anhi9Ea6Mu/N1g=='
 
 # BRW
-$SAK = 'kBvS3pFQ7KozYtSnezXsTukLTSUkGLxf+PfjLVhXLecTC151FhtHhIrIomCUiY24JWeE9zQWNc1mSSZEjjrPVA=='
+$SAK = 'sdfasdfasdffffffffffffffffffffffffffffffff'
 # main -ConfigurationData .\ConfigurationDataSQLx.psd1 -AdminCreds $cred -Verbose -StorageAccountKeySource $sak 
 main -ConfigurationData .\ConfigurationDataSQL1.psd1 -AdminCreds $cred -Verbose -StorageAccountKeySource $sak 
 
