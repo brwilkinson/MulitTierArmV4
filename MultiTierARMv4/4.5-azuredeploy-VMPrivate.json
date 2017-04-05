@@ -173,20 +173,16 @@
     "resourceGroupName": "[resourceGroup().name]",
 
     "AppRoles": [
-        {"Role" : "NACPCON", "StorageType" : "Standard_LRS" },
-        {"Role" : "NACPMO", "StorageType" : "Standard_LRS" },
-        {"Role" : "NACPXML", "StorageType" : "Standard_LRS" }
+        {"Role" : "WebFE", "StorageType" : "Standard_LRS" },
+        {"Role" : "WebMT", "StorageType" : "Standard_LRS" }
     ],
 
     "AppServers": [
-            {"VMName":"NACPCON0","Role":"NACPCON","VMSize":"Standard_DS4","Subnet":"FE"},
-            {"VMName":"NACPCON1","Role":"NACPCON","VMSize":"Standard_DS4","Subnet":"FE"},
+            {"VMName":"WebFE01","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE"},
+            {"VMName":"WebFE02","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE"},
             
-            {"VMName":"NACPMO0","Role":"NACPMO","VMSize":"Standard_DS12","Subnet":"FE"},
-            {"VMName":"NACPMO1","Role":"NACPMO","VMSize":"Standard_DS12","Subnet":"FE"},
-            
-            {"VMName":"NACPXML0","Role":"NACPXML","VMSize":"Standard_DS12","Subnet":"FE"},
-            {"VMName":"NACPXML1","Role":"NACPXML","VMSize":"Standard_DS12","Subnet":"FE"}
+            {"VMName":"WebMT01","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT"},
+            {"VMName":"WebMT02","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT"}
       ],
 
     // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead
