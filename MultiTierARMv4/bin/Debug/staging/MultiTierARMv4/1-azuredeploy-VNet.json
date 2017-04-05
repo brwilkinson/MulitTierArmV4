@@ -1,0 +1,300 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Global
+    "DeploymentID": {
+      "type": "string",
+      "defaultValue": "101",
+      "minLength": 2
+    },
+    "Prefix": {
+      "type": "string",
+      "defaultValue": "MSFT",
+      "minLength": 1
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "Dev",
+      "allowedValues": [
+        "Dev",
+        "Test",
+        "Prod"
+      ]
+    },
+    "vmStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    // Used for all VM's
+    "vmAdminUserName": {
+      "type": "string",
+      "defaultValue": "BRW",
+      "minLength": 3
+    },
+    // Used for all VM's, local and Domain Admin Password
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "vmDomainName": {
+      "type": "string",
+      "defaultValue": "Contoso.com",
+      "allowedValues": [
+        "Contoso.com",
+        "AlpineSkiHouse.com",
+        "Fabrikam.com",
+        "TreyResearch.net"
+      ],
+      "metadata": {
+        "description": "Which ever domain you choose, ensure that your certificates in the KeyVault Match"
+      }
+    },
+    "vmWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ]
+    },
+    "numberOfInstancesMemberServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Member Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesMidTierServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Mid Tier Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesSQLServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of SQL Server VMs to deploy"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access artifactsLocation"
+      }
+    },
+    "vaultName": {
+      "type": "string",
+      "defaultValue": "kvcontosoeastus2",
+      "metadata": {
+        "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
+      },
+      "allowedValues": [
+        "kvcontosoeastus2",
+        "kvcontosoeastus"
+      ]
+    },
+    "vaultResourceGroup": {
+      "type": "string",
+      "defaultValue": "rgGlobal",
+      "metadata": {
+        "description": "Resource Group of the KeyVault"
+      }
+    },
+    "certificateUrl": {
+      "type": "string",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "metadata": {
+        "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
+      }
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "D619F4B333D657325C976F97B7EF5977E740E791",
+      "metadata": {
+        "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
+      }
+    },
+    "DSCUpdateTagVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
+      }
+    },
+    "VnetID": {
+      "type": "string",
+      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+      "metadata": {
+        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+      }
+    },
+    "StorageAccountKeySource": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    // subscriptionId
+    "subscriptionId": "[subscription().subscriptionId]",
+    // rgName
+    "resourceGroupName": "[resourceGroup().name]",
+
+    // Global  BRWDev101
+    "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
+
+    // Network
+    "snPrefix": "10.0.0.0/16",
+
+    // DNS from 1st Domain Controller
+    "DC1PrivateIPAddress": "10.0.0.10",
+
+    // 4 Subnets, FrontEnd, MidTier, BackEnd and Directory
+    // snMSFTDev10-01
+    "snName01": "[concat('sn', variables('Deployment'),'-FE')]",
+    "snName01Prefix": "10.0.3.0/24",
+
+    // snMSFTDev10-02
+    "snName02": "[concat('sn', variables('Deployment'),'-MT')]",
+    "snName02Prefix": "10.0.2.0/24",
+
+    // snMSFTDev10-02
+    "snName03": "[concat('sn', variables('Deployment'),'-BE')]",
+    "snName03Prefix": "10.0.1.0/24",
+
+    // snMSFTDev10-02
+    "snName04": "[concat('sn', variables('Deployment'),'-Directory')]",
+    "snName04Prefix": "10.0.0.0/24",
+
+    "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', concat('vn',Variables('Deployment')))]"
+
+  },
+  "resources": [
+    {
+      "name": "[concat('vn',Variables('Deployment'))]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "vNet"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('snPrefix')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": [
+            "[variables('DC1PrivateIPAddress')]",
+            //"[variables('DC2PrivateIPAddress')]",
+            "8.8.8.8"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('snName01')]",
+            "properties": {
+              "addressPrefix": "[variables('snName01Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('snName02')]",
+            "properties": {
+              "addressPrefix": "[variables('snName02Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('snName03')]",
+            "properties": {
+              "addressPrefix": "[variables('snName03Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('snName04')]",
+            "properties": {
+              "addressPrefix": "[variables('snName04Prefix')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "VNet-AddressPrefixes": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').addressSpace.addressPrefixes]",
+      "type": "array"
+    },
+    "VNet-dhcpOptions": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').dhcpOptions.dnsServers]",
+      "type": "array"
+    },
+    "VNet-Subnet-01": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[0].name]",
+      "type": "string"
+    },
+    "VNet-Subnet-01-addressPrefix": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[0].properties.addressPrefix]",
+      "type": "string"
+    },
+    "VNet-Subnet-02": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[1].name]",
+      "type": "string"
+    },
+    "VNet-Subnet-02-addressPrefix": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[1].properties.addressPrefix]",
+      "type": "string"
+    },
+    "VNet-Subnet-03": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[2].name]",
+      "type": "string"
+    },
+    "VNet-Subnet-03-addressPrefix": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[2].properties.addressPrefix]",
+      "type": "string"
+    },
+    "VNet-Subnet-04": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[3].Name]",
+      "type": "string"
+    },
+    "VNet-Subnet-04-addressPrefix": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[3].properties.addressPrefix]",
+      "type": "string"
+    },
+    "NetworkID": {
+      "value": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/VirtualNetworks', concat('vn',Variables('Deployment')))]",
+      "type": "string"
+    },
+    "Subscription": {
+      "value": "[subscription()]",
+      "type": "object"
+    },
+    "VnetID": {
+      "value": "[resourceId(variables('subscriptionId'),variables('resourceGroupName'), 'Microsoft.Network/VirtualNetworks', concat('vn',Variables('Deployment')))]",
+      "type": "string"
+    }
+
+  }
+}

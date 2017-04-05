@@ -1,0 +1,581 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Global
+    "DeploymentID": {
+      "type": "string",
+      "defaultValue": "101",
+      "minLength": 2
+    },
+    "Prefix": {
+      "type": "string",
+      "defaultValue": "MSFT",
+      "minLength": 1
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "Dev",
+      "allowedValues": [
+        "Dev",
+        "Test",
+        "Prod"
+      ]
+    },
+    "vmStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    // Used for all VM's
+    "vmAdminUserName": {
+      "type": "string",
+      "defaultValue": "BRW",
+      "minLength": 3
+    },
+    // Used for all VM's, local and Domain Admin Password
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "vmDomainName": {
+      "type": "string",
+      "defaultValue": "Contoso.com",
+      "allowedValues": [
+        "Contoso.com",
+        "AlpineSkiHouse.com",
+        "Fabrikam.com",
+        "TreyResearch.net"
+      ],
+      "metadata": {
+        "description": "Which ever domain you choose, ensure that your certificates in the KeyVault Match"
+      }
+    },
+    "vmWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    },
+    "numberOfInstancesMemberServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Member Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesMidTierServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Mid Tier Server VMs to deploy"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access artifactsLocation"
+      }
+    },
+    "vaultName": {
+      "type": "string",
+      "defaultValue": "kvcontosoeastus2",
+      "metadata": {
+        "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
+      },
+      "allowedValues": [
+        "kvcontosoeastus2",
+        "kvcontosoeastus"
+      ]
+    },
+    "vaultResourceGroup": {
+      "type": "string",
+      "defaultValue": "rgGlobal",
+      "metadata": {
+        "description": "Resource Group of the KeyVault"
+      }
+    },
+    "certificateUrl": {
+      "type": "string",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "metadata": {
+        "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
+      }
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "D619F4B333D657325C976F97B7EF5977E740E791",
+      "metadata": {
+        "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
+      }
+    },
+    "DSCUpdateTagVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
+      }
+    },
+    "VnetID": {
+      "type": "string",
+      "defaultValue" :  "Do not use this yet, this value is generated via a Variable.",
+      "metadata": {
+        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+      }
+    }
+  },
+  "variables": {
+    // Global  BRWDev101
+    "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
+
+    // saBRWDev101directory
+    // sabrwdev101directory
+    "saName": "[toLower(concat('sa', variables('Deployment'),'directory'))]",
+
+    // Network
+    "snPrefix": "10.0.0.0/16",
+
+    // snMSFTDev10-Admin
+    "snName04": "[concat('sn', variables('Deployment'),'-Admin')]",
+    "snName04Prefix": "10.0.1.0/24",
+
+    // Update these later to reference a VNet in alternate subscription or resourceGroup
+    // subscriptionId
+    "subscriptionId": "[subscription().subscriptionId]",
+    // rgName
+    "resourceGroupName": "[resourceGroup().name]",
+
+    // DC AvailabilitySetName
+    "asDCsName": "[concat('as', variables('Deployment'),'-Admin')]",
+
+    // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead
+    "VNetID": "[resourceId(variables('subscriptionId'),variables('ResourceGroupName'), 'Microsoft.Network/VirtualNetworks', concat('vn',Variables('Deployment')))]",
+    "SubnetRefAdmin": "[concat(variables('VNetID'), '/subnets/', variables('snName04'))]",
+
+    // VM Global
+    "vmSize": "Standard_D1",
+    "vmImagePublisher": "MicrosoftWindowsServer",
+    "vmImageOffer": "WindowsServer",
+    "vmStorageContainerName": "vhds",
+
+    "Domain": "[split(parameters('vmDomainName'),'.')[0]]",
+
+    // DC1
+    //  vmBRWDev01DC1
+    //  vmBRWDev02DC1
+    "DC1vmName": "[concat('vm', variables('Deployment'),'DC1')]",
+    "DC1vmOSDiskName": "[concat(variables('DC1vmName'),'_vmOSDisk')]",
+    "DC1vmDataDiskName": "[concat(variables('DC1vmName'),'_vmDataDisk')]",
+    "DC1vmNicName": "NIC_vmDC1",
+    "DC1PrivateIPAddress": "10.0.0.10",
+
+    // DC2
+    "DC2vmName": "[concat('vm', variables('Deployment'),'DC2')]",
+    "DC2vmOSDiskName": "[concat(variables('DC2vmName'),'_vmOSDisk')]",
+    "DC2vmDataDiskName": "[concat(variables('DC2vmName'),'_vmDataDisk')]",
+    "DC2vmNicName": "NIC_vmDC2",
+    "DC2PrivateIPAddress": "10.0.0.11",
+
+    //DSC
+    "DSCArchiveFolder": "DSC",
+    "DSCDC1ArchiveFileName": "DSCDC1.zip",
+    "DSCDC2ArchiveFileName": "DSCDC2.zip",
+
+    "ConfigDataFileName": "ConfigurationData.psd1",
+    "ConfigData": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/', variables('ConfigDataFileName'))]",
+
+    //Nested Templates
+    "NestedTemplateFolder": "nestedtemplates",
+    "SetvNetDNS": "SetvNetDNS.json"
+
+  },
+  "resources": [
+    {
+      "name": "[variables('saName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "saName"
+      },
+      "properties": {
+        "accountType": "[parameters('vmStorageAccountType')]"
+      }
+    },
+    {
+      "name": "[variables('asDCsName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "asDomainControllers"
+      },
+      "properties": {
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
+      }
+    },
+    // DC1 NIC
+    {
+      "name": "[variables('DC1vmNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        // Do not include dependencies in other deployments
+        //"[variables('VnetID')]"
+      ],
+      "tags": {
+        "displayName": "vmDC1_NIC"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('DC1PrivateIPAddress')]",
+              "subnet": {
+                "id": "[variables('SubnetRefAdmin')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    // DC2 NIC
+    {
+      "name": "[variables('DC2vmNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        // Do not include dependencies in other deployments
+        //"[variables('VnetID')]"
+      ],
+      "tags": {
+        "displayName": "vmDC2_NIC"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('DC2PrivateIPAddress')]",
+              "subnet": {
+                "id": "[variables('SubnetRefAdmin')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    // MSX NIC
+    // MTX NIC
+    // DC1 VM
+    {
+      "name": "[variables('DC1vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('saName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('DC1vmNicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('asDCsName'))]"
+      ],
+      "tags": {
+        "displayName": "vmDC1",
+        "Environment": "[parameters('Environment')]"
+
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[variables('asDCsName')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "DC1",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('vmImagePublisher')]",
+            "offer": "[variables('vmImageOffer')]",
+            "sku": "[parameters('vmWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('DC1vmOSDiskName')]",
+            "vhd": {
+              "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC1vmOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('DC1vmDataDiskName')]",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC1vmDataDiskName'), '.vhd')]"
+              },
+              "caching": "None",
+              "diskSizeGB": "127",
+              "createOption": "Empty"
+
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('DC1vmNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('DC1vmName'),'_DSC')]",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', variables('DC1vmName'))]"
+          ],
+          "tags": {
+            "displayName": "dscDC1"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "forceUpdateTag": "[parameters('DSCUpdateTagVersion')]",
+            "settings": {
+              "wmfVersion": "latest",
+              "configuration": {
+                "url": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/', variables('DSCDC1ArchiveFileName'))]",
+                "script": "DSCDC1.ps1",
+                "function": "Main"
+              },
+              "configurationArguments": {
+                "DomainName": "[parameters('vmDomainName')]"
+              },
+              "configurationData": {
+                "url": "[variables('ConfigData')]"
+              }
+            },
+            "protectedSettings": {
+              "configurationArguments": {
+                "AdminCreds": {
+                  "UserName": "[parameters('vmAdminUserName')]",
+                  "Password": "[parameters('vmAdminPassword')]"
+                }
+              },
+              "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationDataUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
+            }
+          }
+        }
+      ]
+    },
+    // DC2 VM
+    {
+      "name": "[variables('DC2vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('saName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('DC2vmNicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('asDCsName'))]"
+      ],
+      "tags": {
+        "displayName": "vmDC2",
+        "Environment": "[parameters('Environment')]"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[variables('asDCsName')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "DC2",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('vmImagePublisher')]",
+            "offer": "[variables('vmImageOffer')]",
+            "sku": "[parameters('vmWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('DC2vmOSDiskName')]",
+            "vhd": {
+              "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC2vmOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('DC2vmDataDiskName')]",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC2vmDataDiskName'), '.vhd')]"
+              },
+              "caching": "None",
+              "diskSizeGB": "127",
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('DC2vmNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('DC2vmName'),'_DSC')]",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', variables('DC2vmName'))]"
+          ],
+          "tags": {
+            "displayName": "dscDC2"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "forceUpdateTag": "[parameters('DSCUpdateTagVersion')]",
+            "settings": {
+              "wmfVersion": "latest",
+              "configuration": {
+                "url": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/', variables('DSCDC2ArchiveFileName'))]",
+                "script": "DSCDC2.ps1",
+                "function": "Main"
+              },
+              "configurationArguments": {
+                "DomainName": "[parameters('vmDomainName')]"
+              },
+              "configurationData": {
+                "url": "[variables('ConfigData')]"
+              }
+            },
+            "protectedSettings": {
+              "configurationArguments": {
+                "AdminCreds": {
+                  "UserName": "[parameters('vmAdminUserName')]",
+                  "Password": "[parameters('vmAdminPassword')]"
+                }
+              },
+              "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationDataUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
+            }
+          }
+        }
+      ]
+    },
+    // MidTier VM Loop
+    // MS VM Loop
+    // DC1 Public IP
+    // DC2 Public IP
+    // MS1 Public IP
+    // MTX Public IP
+    // Remove the Public DNS from the Subnet, set only DC1
+    {
+      "name": "RemovePublicDNS",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('DC1vmName'), '/extensions/', variables('DC1vmName'), '_DSC')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('NestedTemplateFolder'), '/', variables('SetvNetDNS'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "Deployment": {
+            "value": "[variables('Deployment')]"
+          },
+          "DNSServers": {
+            "value": [
+              "[variables('DC1PrivateIPAddress')]",
+              "10.0.0.50"
+            ]
+          }
+        }
+      }
+    },
+    // Add DC2 in as DNS Server
+    {
+      "name": "AddDC2DNS",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('DC2vmName'), '/extensions/', variables('DC2vmName'), '_DSC')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('NestedTemplateFolder'), '/', variables('SetvNetDNS'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "Deployment": {
+            "value": "[variables('Deployment')]"
+          },
+          "DNSServers": {
+            "value": [
+              "[variables('DC1PrivateIPAddress')]",
+              "[variables('DC2PrivateIPAddress')]"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    
+  }
+}

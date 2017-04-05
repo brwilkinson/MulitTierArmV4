@@ -1,0 +1,251 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Global
+    "DeploymentID": {
+      "type": "string",
+      "defaultValue": "101",
+      "minLength": 2
+    },
+    "Prefix": {
+      "type": "string",
+      "defaultValue": "MSFT",
+      "minLength": 1
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "Dev",
+      "allowedValues": [
+        "Dev",
+        "Test",
+        "Prod"
+      ]
+    },
+    "vmStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    // Used for all VM's
+    "vmAdminUserName": {
+      "type": "string",
+      "defaultValue": "BRW",
+      "minLength": 3
+    },
+    // Used for all VM's, local and Domain Admin Password
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "vmDomainName": {
+      "type": "string",
+      "defaultValue": "Contoso.com",
+      "allowedValues": [
+        "Contoso.com",
+        "AlpineSkiHouse.com",
+        "Fabrikam.com",
+        "TreyResearch.net"
+      ],
+      "metadata": {
+        "description": "Which ever domain you choose, ensure that your certificates in the KeyVault Match"
+      }
+    },
+    "vmWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ]
+    },
+    "numberOfInstancesMemberServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Member Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesMidTierServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Mid Tier Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesSQLServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of SQL Server VMs to deploy"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access artifactsLocation"
+      }
+    },
+    "vaultName": {
+      "type": "string",
+      "defaultValue": "kvcontosoeastus2",
+      "metadata": {
+        "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
+      },
+      "allowedValues": [
+        "kvcontosoeastus2",
+        "kvcontosoeastus"
+      ]
+    },
+    "vaultResourceGroup": {
+      "type": "string",
+      "defaultValue": "rgGlobal",
+      "metadata": {
+        "description": "Resource Group of the KeyVault"
+      }
+    },
+    "certificateUrl": {
+      "type": "string",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "metadata": {
+        "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
+      }
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "D619F4B333D657325C976F97B7EF5977E740E791",
+      "metadata": {
+        "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
+      }
+    },
+    "DSCUpdateTagVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
+      }
+    },
+    "VnetID": {
+      "type": "string",
+      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+      "metadata": {
+        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+      }
+    },
+    "StorageAccountKeySource": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    // Share the same parameters file
+    "TemplateParametersFileName": "azuredeploy.parameters.json",
+
+    "VNetTemplateFileName": "1-azuredeploy-VNet.json",
+    "DirectoryTemplateFileName": "2-azuredeploy-Directory.json",
+    "DataBaseTemplateFileName": "3-azuredeploy-DataBase.json",
+    "MidTierTemplateFileName": "4-azuredeploy-MidTier.json",
+    "FrontEndTemplateFileName": "5-azuredeploy-FrontEnd.json"
+
+  },
+  "resources": [
+    {
+      "name": "VNet",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('VNetTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": "[deployment().properties.parameters]"
+      }
+    },
+    {
+      "name": "Directory",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/VNet"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DirectoryTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": "[deployment().properties.parameters]"
+      }
+    },
+    {
+      "name": "DataBase",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/Directory"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DataBaseTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": "[deployment().properties.parameters]"
+      }
+    } //,
+    //{
+    //  "name": "MidTier",
+    //  "type": "Microsoft.Resources/deployments",
+    //  "apiVersion": "2016-09-01",
+    //  "dependsOn": [
+    //    "Microsoft.Resources/deployments/Directory"
+    //  ],
+    //  "properties": {
+    //    "mode": "Incremental",
+    //    "templateLink": {
+    //      "uri": "[concat(parameters('_artifactsLocation'), '/', variables('MidTierTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+    //      "contentVersion": "1.0.0.0"
+    //    },
+    //    "parameters": "[deployment().properties.parameters]"
+    //  }
+    //},
+    //{
+    //  "name": "FrontEnd",
+    //  "type": "Microsoft.Resources/deployments",
+    //  "apiVersion": "2016-09-01",
+    //  "dependsOn": [
+    //    "Microsoft.Resources/deployments/Directory"
+    //  ],
+    //  "properties": {
+    //    "mode": "Incremental",
+    //    "templateLink": {
+    //      "uri": "[concat(parameters('_artifactsLocation'), '/', variables('FrontEndTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+    //      "contentVersion": "1.0.0.0"
+    //    },
+    //    "parameters": "[deployment().properties.parameters]"
+    //  }
+    //}
+  ],
+  "outputs": {
+  }
+}

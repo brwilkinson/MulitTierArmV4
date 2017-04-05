@@ -1,0 +1,353 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Global
+    "DeploymentID": {
+      "type": "string",
+      "defaultValue": "101",
+      "minLength": 2
+    },
+    "Prefix": {
+      "type": "string",
+      "defaultValue": "MSFT",
+      "minLength": 1
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "Dev",
+      "allowedValues": [
+        "Dev",
+        "Test",
+        "Prod"
+      ]
+    },
+    "vmStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    // Used for all VM's
+    "vmAdminUserName": {
+      "type": "string",
+      "defaultValue": "brw",
+      "minLength": 3
+    },
+    // Used for all VM's, local and Domain Admin Password
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "vmDomainName": {
+      "type": "string",
+      "defaultValue": "Contoso.com",
+      "allowedValues": [
+        "edge.com",
+        "titleeditor.com",
+        "Contoso.com",
+        "AlpineSkiHouse.com",
+        "Fabrikam.com",
+        "TreyResearch.net"
+      ],
+      "metadata": {
+        "description": "Which ever domain you choose, ensure that your certificates in the KeyVault Match"
+      }
+    },
+    "vmWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ]
+    },
+    "numberOfInstancesMemberServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Member Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesMidTierServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of Mid Tier Server VMs to deploy"
+      }
+    },
+    "numberOfInstancesSQLServer": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 20,
+      "metadata": {
+        "description": "Number of SQL Server VMs to deploy"
+      }
+    },
+    "vaultName": {
+      "type": "string",
+      "defaultValue": "kvcontosoeastus2",
+      "metadata": {
+        "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
+      },
+      "allowedValues": [
+        "NACKeyValultEUS2",
+        "kvcontosoeastus2",
+        "kvcontosoeastus"
+      ]
+    },
+    "vaultResourceGroup": {
+      "type": "string",
+      "defaultValue": "rgGlobal",
+      "metadata": {
+        "description": "Resource Group of the KeyVault"
+      }
+    },
+    "certificateUrl": {
+      "type": "string",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "metadata": {
+        "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
+      }
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "606295CAE217319DC730F8F16D52C6BEF636047B",
+      "metadata": {
+        "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
+      }
+    },
+    "DSCUpdateTagVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
+      }
+    },
+    "VnetID": {
+      "type": "string",
+      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+      "metadata": {
+        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+      }
+    },
+    "StorageAccountKeySource": {
+      "type": "securestring"
+    },
+    "OMSKey": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    // Global  BRWDev101
+    "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
+
+    // Update these later to reference a VNet in alternate subscription or resourceGroup
+    // subscriptionId
+    "subscriptionId": "[subscription().subscriptionId]",
+    // rgName
+    "resourceGroupName": "[resourceGroup().name]",
+
+    "snName03": "[concat('sn', variables('Deployment'),'-BE')]",
+    "LBBEAddressPoolName": "SQLAlwaysOn_DataBase",
+
+    "LBInfo": [
+      {
+        "LBFEName": "SQLAlwaysOn_EDG01",
+        "LBFEIP": "10.144.135.100",
+        "LBFEPort": 1433,
+        "LBBEPort": 1433,
+        "LBBEProbePort": 59999
+      },
+      {
+        "LBFEName": "SQLAlwaysOn_EDG02",
+        "LBFEIP": "10.144.135.101",
+        "LBFEPort": 1433,
+        "LBBEPort": 1432,
+        "LBBEProbePort": 59998
+      },
+      {
+        "LBFEName": "SQLAlwaysOn_OCR01",
+        "LBFEIP": "10.144.135.102",
+        "LBFEPort": 1433,
+        "LBBEPort": 1431,
+        "LBBEProbePort": 59997
+      }
+    ],
+
+    "LBName": "[concat('ILB_', variables('Deployment'),'SQLAlwaysOn')]",
+
+    // Everything below this line comes from the above table and snName
+    "LBID": "[resourceId('Microsoft.Network/loadBalancers/',variables('LBName'))]",
+
+    "LBFEConfigID1": "[concat(variables('LBID'),'/frontendIPConfigurations/',variables('LBInfo')[0].LBFEName)]",
+    "LBFEConfigID2": "[concat(variables('LBID'),'/frontendIPConfigurations/',variables('LBInfo')[1].LBFEName)]",
+    "LBFEConfigID3": "[concat(variables('LBID'),'/frontendIPConfigurations/',variables('LBInfo')[2].LBFEName)]",
+
+    "ProbeID1": "[concat(variables('LBID'),'/probes/',variables('LBInfo')[0].LBFEName)]",
+    "ProbeID2": "[concat(variables('LBID'),'/probes/',variables('LBInfo')[1].LBFEName)]",
+    "ProbeID3": "[concat(variables('LBID'),'/probes/',variables('LBInfo')[2].LBFEName)]",
+
+    // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead
+    "VNetID": "[resourceId(variables('subscriptionId'),variables('ResourceGroupName'), 'Microsoft.Network/VirtualNetworks', concat('vn',Variables('Deployment')))]",
+    "SubnetRefBE": "[concat(variables('VNetID'), '/subnets/', variables('snName03'))]",
+    "LBBEAddressPoolID": "[concat(variables('LBID'),'/backendAddressPools/',variables('LBBEAddressPoolName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[variables('LBName')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "ILB_Deploy"
+      },
+      "dependsOn": [
+
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('LBInfo')[0].LBFEName]",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('LBInfo')[0].LBFEIP]",
+              "subnet": {
+                "id": "[variables('SubnetRefBE')]"
+              }
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[1].LBFEName]",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('LBInfo')[1].LBFEIP]",
+              "subnet": {
+                "id": "[variables('SubnetRefBE')]"
+              }
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[2].LBFEName]",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('LBInfo')[2].LBFEIP]",
+              "subnet": {
+                "id": "[variables('SubnetRefBE')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('LBBEAddressPoolName')]"
+
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('LBInfo')[0].LBFEName]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('LBFEConfigID1')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('LBBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('ProbeID1')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": "[variables('LBInfo')[0].LBFEPort]",
+              "backendPort": "[variables('LBInfo')[0].LBBEPort]",
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[1].LBFEName]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('LBFEConfigID2')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('LBBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('ProbeID2')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": "[variables('LBInfo')[1].LBFEPort]",
+              "backendPort": "[variables('LBInfo')[1].LBBEPort]",
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[2].LBFEName]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('LBFEConfigID3')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('LBBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('ProbeID3')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": "[variables('LBInfo')[2].LBFEPort]",
+              "backendPort": "[variables('LBInfo')[2].LBBEPort]",
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('LBInfo')[0].LBFEName]",
+            "properties": {
+              "protocol": "Tcp",
+              "port": "[variables('LBInfo')[0].LBBEProbePort]",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[1].LBFEName]",
+            "properties": {
+              "protocol": "Tcp",
+              "port": "[variables('LBInfo')[1].LBBEProbePort]",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          },
+          {
+            "name": "[variables('LBInfo')[2].LBFEName]",
+            "properties": {
+              "protocol": "Tcp",
+              "port": "[variables('LBInfo')[2].LBBEProbePort]",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ]
+      }
+    }
+
+  ],
+  "outputs": {
+    //"MT1-fqdn": {
+    //  "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses','PublicIP_vmMT1'), '2016-07-01').dnsSettings.fqdn]",
+    //  "type": "string"
+    //}
+  }
+}

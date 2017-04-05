@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>43454531-3461-4455-85ed-b0a782cd40f3</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>1.0</TargetFrameworkVersion>
+    <PrepareForBuildDependsOn>
+    </PrepareForBuildDependsOn>
+  </PropertyGroup>
+  <Import Condition=" Exists('Deployment.targets') " Project="Deployment.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- vertag<:>start tokens<:>maj.min -->
+  <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
+  <!-- vertag<:>end -->
+  <ItemGroup>
+    <Content Include="2-azuredeploy-Directory.json" />
+    <Content Include="azuredeploy.parameters.json" />
+    <Content Include="1-azuredeploy-VNet.json" />
+    <Content Include="3-azuredeploy-DataBase.json" />
+    <Content Include="5-azuredeploy-FrontEnd.json" />
+    <Content Include="4-azuredeploy-MidTier.json" />
+    <Content Include="DSC\ConfigurationDataSQL.psd1" />
+    <Content Include="DSC\DSCSQLx.ps1" />
+    <Content Include="0-azuredeploy-ALL.json" />
+    <Content Include="DSC\ConfigurationDataSQL1.psd1" />
+    <Content Include="DSC\ConfigurationDataSQLx.psd1" />
+    <Content Include="6-azuredeploy-ILBalancer.json" />
+    <Content Include="4.5-azuredeploy-VMPrivate.json" />
+    <Content Include="4.5-azuredeploy-VMPublic.json" />
+    <None Include="PrereqsToDeploy\CreateKeyVaultAndStoreSecrets.ps1" />
+    <None Include="PrereqsToDeploy\CreateUploadCertificatestoKeyVault.ps1" />
+    <None Include="Deployment.targets">
+      <Visible>False</Visible>
+    </None>
+    <Content Include="Deploy-AzureResourceGroup.ps1" />
+    <Content Include="DSC\DSCDC1.ps1" />
+    <Content Include="DSC\DSCDC2.ps1" />
+    <Content Include="DSC\DSCMTx.ps1" />
+    <Content Include="DSC\DSCMSx.ps1" />
+    <Content Include="DSC\ConfigurationData.psd1" />
+    <Content Include="nestedtemplates\SetvNetDNS.json" />
+    <None Include="ReadMe-DeploymentFeatures.md" />
+  </ItemGroup>
+  <Target Name="GetReferenceAssemblyPaths" />
+</Project>
