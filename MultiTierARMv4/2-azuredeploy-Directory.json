@@ -244,7 +244,7 @@
         "displayName": "availabilitySet"
       },
       "properties": {
-        "platformUpdateDomainCount": 3,
+        "platformUpdateDomainCount": 5,
         "platformFaultDomainCount": 3
       }
     },

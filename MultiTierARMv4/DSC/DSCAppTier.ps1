@@ -418,8 +418,8 @@ break
 
 
 
-#$SAK = '/j2RCKX1V826mdRiw6iIAcB/+i0WGjNAGbjZ2p1IsmBkuIgUJAtUJbS6DikfS7INAYtc+N+u7wf/8EFlvpRqTA=='
-$SAK = 'SmABTRmWeJ12VkpKCEBqTz8YbLcOiClh+ZZitgGPjYMN5JQjxtBhs+jgGUN/YXljTNnC/tS/Anhi9Ea6Mu/N1g=='
+
+$SAK = read-host enterstorageaccountkey
     
 #$sakss = ConvertTo-SecureString -String $SAK -AsPlainText -Force
 Get-ChildItem -Path .\Main -Filter *.mof | Remove-Item 
@@ -454,8 +454,6 @@ Test-DscConfiguration
 $r = Test-DscConfiguration -detailed
 $r.ResourcesNotInDesiredState
 $r.ResourcesInDesiredState
-
-ASDFasdf1234!!
 
 # Install-Module -name xComputerManagement,xActiveDirectory,xStorage,xPendingReboot,xWebAdministration,xPSDesiredStateConfiguration,SecurityPolicyDSC  -Force
 
