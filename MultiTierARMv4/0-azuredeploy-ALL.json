@@ -141,16 +141,16 @@
     }
   },
   "variables": {
-    // Share the same parameters file
-    "TemplateParametersFileName": "azuredeploy.parameters.json",
 
     "DeploymentInfoObject": [
       {"DPStage" : "VNet"     ,"TemplateName" : "1-azuredeploy-VNet.json"     },
       {"DPStage" : "Directory","TemplateName" : "2-azuredeploy-Directory.json"},
       {"DPStage" : "DataBase" ,"TemplateName" : "3-azuredeploy-DataBase.json" },
-      {"DPStage" : "VMPrivate","TemplateName" : "4-azuredeploy-MidTier.json"  },
-      {"DPStage" : "VMPublic" ,"TemplateName" : "5-azuredeploy-FrontEnd.json" }
-      ]
+      {"DPStage" : "VMPrivate","TemplateName" : "4-azuredeploy-VMPublic.json"  },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "5-azuredeploy-VMPrivate.json" },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "6-azuredeploy-ILBalancer.json" },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "7-azuredeployWebAppFirewall.json" }    
+    ]
   },
   "resources": [
     {
