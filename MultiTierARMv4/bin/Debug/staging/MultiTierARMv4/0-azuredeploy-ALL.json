@@ -66,24 +66,7 @@
         "2016-Datacenter"
       ]
     },
-    "numberOfInstancesMemberServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Member Server VMs to deploy"
-      }
-    },
-    "numberOfInstancesMidTierServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Mid Tier Server VMs to deploy"
-      }
-    },
+    // Looking to remove this and move to InfoObject
     "numberOfInstancesSQLServer": {
       "type": "int",
       "defaultValue": 2,
@@ -144,107 +127,49 @@
         "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
       }
     },
-    "VnetID": {
-      "type": "string",
-      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+    "StorageAccountKeySource": {
+      "type": "securestring",
       "metadata": {
-        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+        "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "StorageAccountKeySource": {
+    "OMSworkspaceId": {
+      "type": "securestring"
+    },
+    "OMSKey": {
       "type": "securestring"
     }
   },
   "variables": {
-    // Share the same parameters file
-    "TemplateParametersFileName": "azuredeploy.parameters.json",
-
-    "VNetTemplateFileName": "1-azuredeploy-VNet.json",
-    "DirectoryTemplateFileName": "2-azuredeploy-Directory.json",
-    "DataBaseTemplateFileName": "3-azuredeploy-DataBase.json",
-    "MidTierTemplateFileName": "4-azuredeploy-MidTier.json",
-    "FrontEndTemplateFileName": "5-azuredeploy-FrontEnd.json"
-
+    "DeploymentInfoObject": [
+      {"DPStage" : "VNet"     ,"TemplateName" : "1-azuredeploy-VNet.json"     },
+      {"DPStage" : "Directory","TemplateName" : "2-azuredeploy-Directory.json"},
+      {"DPStage" : "DataBase" ,"TemplateName" : "3-azuredeploy-DataBase.json" },
+      {"DPStage" : "VMPrivate","TemplateName" : "4-azuredeploy-VMPublic.json"  },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "5-azuredeploy-VMPrivate.json" },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "6-azuredeploy-ILBalancer.json" },
+      {"DPStage" : "VMPublic" ,"TemplateName" : "7-azuredeployWebAppFirewall.json" }    
+    ]
   },
   "resources": [
     {
-      "name": "VNet",
+      "name": "MultiTierDeploymentLoop",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [],
+      "copy": {
+        "name": "vmLoop",
+        "count": "[length(variables('DeploymentInfoObject'))]"
+      },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('VNetTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DeploymentInfoObject')[copyIndex(0)].TemplateName, parameters('_artifactsLocationSasToken'))]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": "[deployment().properties.parameters]"
       }
-    },
-    {
-      "name": "Directory",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/VNet"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DirectoryTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": "[deployment().properties.parameters]"
-      }
-    },
-    {
-      "name": "DataBase",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/Directory"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DataBaseTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": "[deployment().properties.parameters]"
-      }
-    } //,
-    //{
-    //  "name": "MidTier",
-    //  "type": "Microsoft.Resources/deployments",
-    //  "apiVersion": "2016-09-01",
-    //  "dependsOn": [
-    //    "Microsoft.Resources/deployments/Directory"
-    //  ],
-    //  "properties": {
-    //    "mode": "Incremental",
-    //    "templateLink": {
-    //      "uri": "[concat(parameters('_artifactsLocation'), '/', variables('MidTierTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
-    //      "contentVersion": "1.0.0.0"
-    //    },
-    //    "parameters": "[deployment().properties.parameters]"
-    //  }
-    //},
-    //{
-    //  "name": "FrontEnd",
-    //  "type": "Microsoft.Resources/deployments",
-    //  "apiVersion": "2016-09-01",
-    //  "dependsOn": [
-    //    "Microsoft.Resources/deployments/Directory"
-    //  ],
-    //  "properties": {
-    //    "mode": "Incremental",
-    //    "templateLink": {
-    //      "uri": "[concat(parameters('_artifactsLocation'), '/', variables('FrontEndTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
-    //      "contentVersion": "1.0.0.0"
-    //    },
-    //    "parameters": "[deployment().properties.parameters]"
-    //  }
-    //}
+    }
   ],
   "outputs": {
   }

@@ -47,8 +47,6 @@
       "type": "string",
       "defaultValue": "Contoso.com",
       "allowedValues": [
-        "edge.com",
-        "titleeditor.com",
         "Contoso.com",
         "AlpineSkiHouse.com",
         "Fabrikam.com",
@@ -68,24 +66,6 @@
         "2016-Datacenter"
       ]
     },
-    "numberOfInstancesMemberServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Member Server VMs to deploy"
-      }
-    },
-    "numberOfInstancesMidTierServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Mid Tier Server VMs to deploy"
-      }
-    },
     "numberOfInstancesSQLServer": {
       "type": "int",
       "defaultValue": 2,
@@ -102,7 +82,6 @@
         "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
       },
       "allowedValues": [
-        "NACKeyValultEUS2",
         "kvcontosoeastus2",
         "kvcontosoeastus"
       ]
@@ -135,14 +114,13 @@
         "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
       }
     },
-    "VnetID": {
-      "type": "string",
-      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+    "StorageAccountKeySource": {
+      "type": "securestring",
       "metadata": {
-        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+        "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "StorageAccountKeySource": {
+    "OMSworkspaceId": {
       "type": "securestring"
     },
     "OMSKey": {
@@ -199,7 +177,7 @@
     "ProbeID2": "[concat(variables('LBID'),'/probes/',variables('LBInfo')[1].LBFEName)]",
     "ProbeID3": "[concat(variables('LBID'),'/probes/',variables('LBInfo')[2].LBFEName)]",
 
-    // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead
+    // Note if the deployment is into a VNET in a different subscription or resource group this needs to be updated
     "VNetID": "[resourceId(variables('subscriptionId'),variables('ResourceGroupName'), 'Microsoft.Network/VirtualNetworks', concat('vn',Variables('Deployment')))]",
     "SubnetRefBE": "[concat(variables('VNetID'), '/subnets/', variables('snName03'))]",
     "LBBEAddressPoolID": "[concat(variables('LBID'),'/backendAddressPools/',variables('LBBEAddressPoolName'))]"

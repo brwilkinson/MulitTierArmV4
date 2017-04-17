@@ -141,7 +141,7 @@
     }
   },
   "variables": {
-
+    "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
     "DeploymentInfoObject": [
       {"DPStage" : "VNet"     ,"TemplateName" : "1-azuredeploy-VNet.json"     },
       {"DPStage" : "Directory","TemplateName" : "2-azuredeploy-Directory.json"},
@@ -154,7 +154,7 @@
   },
   "resources": [
     {
-      "name": "MultiTierDeploymentLoop",
+      "name": "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[copyIndex(0)].DPStage)]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [],

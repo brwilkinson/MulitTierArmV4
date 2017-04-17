@@ -143,21 +143,21 @@
     "LBInfo": [
       {
         "LBFEName": "SQLAlwaysOn_EDG01",
-        "LBFEIP": "10.144.135.100",
+        "LBFEIP": "10.0.1.100",
         "LBFEPort": 1433,
         "LBBEPort": 1433,
         "LBBEProbePort": 59999
       },
       {
         "LBFEName": "SQLAlwaysOn_EDG02",
-        "LBFEIP": "10.144.135.101",
+        "LBFEIP": "10.0.1.101",
         "LBFEPort": 1433,
         "LBBEPort": 1432,
         "LBBEProbePort": 59998
       },
       {
         "LBFEName": "SQLAlwaysOn_OCR01",
-        "LBFEIP": "10.144.135.102",
+        "LBFEIP": "10.0.1.102",
         "LBFEPort": 1433,
         "LBBEPort": 1431,
         "LBBEProbePort": 59997

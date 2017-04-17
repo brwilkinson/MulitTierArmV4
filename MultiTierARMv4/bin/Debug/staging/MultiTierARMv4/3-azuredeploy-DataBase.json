@@ -47,7 +47,6 @@
       "type": "string",
       "defaultValue": "Contoso.com",
       "allowedValues": [
-        "Edge.com",
         "Contoso.com",
         "AlpineSkiHouse.com",
         "Fabrikam.com",
@@ -66,24 +65,6 @@
         "2012-R2-Datacenter",
         "2016-Datacenter"
       ]
-    },
-    "numberOfInstancesMemberServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Member Server VMs to deploy"
-      }
-    },
-    "numberOfInstancesMidTierServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Mid Tier Server VMs to deploy"
-      }
     },
     "numberOfInstancesSQLServer": {
       "type": "int",
@@ -113,7 +94,6 @@
         "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
       },
       "allowedValues": [
-        "NACKeyValultEUS2",
         "kvcontosoeastus2",
         "kvcontosoeastus"
       ]
@@ -146,14 +126,16 @@
         "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
       }
     },
-    "VnetID": {
-      "type": "string",
-      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+    "StorageAccountKeySource": {
+      "type": "securestring",
       "metadata": {
-        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+        "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "StorageAccountKeySource": {
+    "OMSworkspaceId": {
+      "type": "securestring"
+    },
+    "OMSKey": {
       "type": "securestring"
     }
   },
@@ -239,8 +221,8 @@
         "displayName": "availabilitySet"
       },
       "properties": {
-        "platformUpdateDomainCount": 1,
-        "platformFaultDomainCount": 1
+        "platformUpdateDomainCount": 5,
+        "platformFaultDomainCount": 3
       }
     },
     {
@@ -319,184 +301,188 @@
         "Environment": "[parameters('Environment')]"
       },
       "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[concat('SQL', copyIndex(1))]",
-          "adminUsername": "[parameters('vmAdminUsername')]",
-          "adminPassword": "[parameters('vmAdminPassword')]",
-          "secrets": [
-            {
-              "sourceVault": {
-                "id": "[resourceId(parameters('vaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-              },
-              "vaultCertificates": [
-                {
-                  "certificateUrl": "[parameters('certificateUrl')]",
-                  "certificateStore": "My"
+        "properties": {
+          "availabilitySet": {
+            "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('asName'))]"
+          },
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[concat('SQL', copyIndex(1))]",
+            "adminUsername": "[parameters('vmAdminUsername')]",
+            "adminPassword": "[parameters('vmAdminPassword')]",
+            "secrets": [
+              {
+                "sourceVault": {
+                  "id": "[resourceId(parameters('vaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
                 },
-                {
-                  "certificateUrl": "[parameters('certificateUrl')]",
-                  "certificateStore": "Root"
-                },
-                {
-                  "certificateUrl": "[parameters('certificateUrl')]",
-                  "certificateStore": "CA"
-                }
-              ]
-            }
-          ]
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('vmImagePublisher')]",
-            "offer": "[variables('vmImageOffer')]",
-            "sku": "[parameters('vmWindowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "[concat('SQL', copyIndex(1), '_vmosDisk')]",
-            "vhd": {
-              "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmOsDisk', '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "name": "[concat('SQL', copyIndex(1), '_vmDataDisk0')]",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk0', '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "diskSizeGB": "1023",
-              "createOption": "Empty"
-            },
-            {
-              "name": "[concat('SQL', copyIndex(1), '_vmDataDisk1')]",
-              "lun": 1,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk1', '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "diskSizeGB": "1023",
-              "createOption": "Empty"
-            },
-            {
-              "name": "[concat('SQL', copyIndex(1), '_vmDataDisk2')]",
-              "lun": 2,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk2', '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "diskSizeGB": "1023",
-              "createOption": "Empty"
-            },
-            {
-              "name": "[concat('SQL', copyIndex(1), '_vmDataDisk3')]",
-              "lun": 3,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk3', '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "diskSizeGB": "1023",
-              "createOption": "Empty"
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('NIC_vmSQL', copyIndex(1)))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "name": "[concat('vm', variables('Deployment'), 'SQL' ,copyIndex(1), '_DSC')]",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('vm', variables('Deployment'), 'SQL' ,copyIndex(1)))]"
-          ],
-          "tags": {
-            "displayName": "dscSQLx"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.22",
-            "autoUpgradeMinorVersion": true,
-            "forceUpdateTag": "[parameters('DSCUpdateTagVersion')]",
-            "settings": {
-              "wmfVersion": "latest",
-              "configuration": {
-                "url": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/', variables('DSCSQLxArchiveFileName'))]",
-                "script": "DSCSQLx.ps1",
-                "function": "Main"
-              },
-              "configurationArguments": {
-                "DomainName": "[parameters('vmDomainName')]",
-                "Thumbprint": "[parameters('certificateThumbprint')]",
-                "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
-              },
-              "configurationData": {
-                "url": "[concat(variables('ConfigDataSQL'),variables('ConfigDataFileNameSQL')[copyIndex(0)])]"
+                "vaultCertificates": [
+                  {
+                    "certificateUrl": "[parameters('certificateUrl')]",
+                    "certificateStore": "My"
+                  },
+                  {
+                    "certificateUrl": "[parameters('certificateUrl')]",
+                    "certificateStore": "Root"
+                  },
+                  {
+                    "certificateUrl": "[parameters('certificateUrl')]",
+                    "certificateStore": "CA"
+                  }
+                ]
               }
+            ]
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('vmImagePublisher')]",
+              "offer": "[variables('vmImageOffer')]",
+              "sku": "[parameters('vmWindowsOSVersion')]",
+              "version": "latest"
             },
-            "protectedSettings": {
-              "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationDataUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationArguments": {
-                "AdminCreds": {
-                  "UserName": "[parameters('vmAdminUserName')]",
-                  "Password": "[parameters('vmAdminPassword')]"
+            "osDisk": {
+              "name": "[concat('SQL', copyIndex(1), '_vmosDisk')]",
+              "vhd": {
+                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmOsDisk', '.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+              {
+                "name": "[concat('SQL', copyIndex(1), '_vmDataDisk0')]",
+                "lun": 0,
+                "vhd": {
+                  "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk0', '.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "diskSizeGB": "1023",
+                "createOption": "Empty"
+              },
+              {
+                "name": "[concat('SQL', copyIndex(1), '_vmDataDisk1')]",
+                "lun": 1,
+                "vhd": {
+                  "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk1', '.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "diskSizeGB": "1023",
+                "createOption": "Empty"
+              },
+              {
+                "name": "[concat('SQL', copyIndex(1), '_vmDataDisk2')]",
+                "lun": 2,
+                "vhd": {
+                  "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk2', '.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "diskSizeGB": "1023",
+                "createOption": "Empty"
+              },
+              {
+                "name": "[concat('SQL', copyIndex(1), '_vmDataDisk3')]",
+                "lun": 3,
+                "vhd": {
+                  "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', 'SQL', copyIndex(1), '_vmDataDisk3', '.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "diskSizeGB": "1023",
+                "createOption": "Empty"
+              }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('NIC_vmSQL', copyIndex(1)))]"
+              }
+            ]
+          }
+        },
+        "resources": [
+          {
+            "name": "[concat('vm', variables('Deployment'), 'SQL' ,copyIndex(1), '_DSC')]",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachines', concat('vm', variables('Deployment'), 'SQL' ,copyIndex(1)))]"
+            ],
+            "tags": {
+              "displayName": "dscSQLx"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.22",
+              "autoUpgradeMinorVersion": true,
+              "forceUpdateTag": "[parameters('DSCUpdateTagVersion')]",
+              "settings": {
+                "wmfVersion": "latest",
+                "configuration": {
+                  "url": "[concat(parameters('_artifactsLocation'), '/', variables('DSCArchiveFolder'), '/', variables('DSCSQLxArchiveFileName'))]",
+                  "script": "DSCSQLx.ps1",
+                  "function": "Main"
+                },
+                "configurationArguments": {
+                  "DomainName": "[parameters('vmDomainName')]",
+                  "Thumbprint": "[parameters('certificateThumbprint')]",
+                  "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
+                },
+                "configurationData": {
+                  "url": "[concat(variables('ConfigDataSQL'),variables('ConfigDataFileNameSQL')[copyIndex(0)])]"
+                }
+              },
+              "protectedSettings": {
+                "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationDataUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationArguments": {
+                  "AdminCreds": {
+                    "UserName": "[parameters('vmAdminUserName')]",
+                    "Password": "[parameters('vmAdminPassword')]"
+                  }
                 }
               }
             }
           }
-        }
-      ]
-    } //,
-    //  {
-    //    "apiVersion": "2015-06-15",
-    //    "type": "Microsoft.Network/networkInterfaces",
-    //    "location": "[resourceGroup().location]",
-    //    "name": "[concat('NIC_vmMS', copyIndex(1))]",
-    //    "copy": {
-    //      "name": "nicLoop",
-    //      "count": "[parameters('numberOfInstancesMemberServer')]"
-    //    },
-    //    "dependsOn": [
-    //      // Do not include dependencies in other deployments
-    //      //"[variables('VnetID')]",
-    //      "[concat('Microsoft.Network/publicIPAddresses/', concat('PublicIP_vmMS', copyIndex(1)))]"
-    //    ],
-    //    "tags": {
-    //      "displayName": "vmMSX_NIC"
-    //    },
-    //    "properties": {
-    //      "ipConfigurations": [
-    //        {
-    //          "name": "ipconfig1",
-    //          "properties": {
-    //            "privateIPAllocationMethod": "Dynamic",
-    //            "subnet": {
-    //              "id": "[variables('SubnetRefBE')]"
-    //            },
-    //            "publicIPAddress": {
-    //              "id": "[resourceId( 'Microsoft.Network/publicIPAddresses', concat('PublicIP_vmMS', copyIndex(1)) )]"
-    //
-    //            }
-    //          }
-    //        }
-    //      ]
-    //    }
-    //  }
+        ]
+      } //,
+      //  {
+      //    "apiVersion": "2015-06-15",
+      //    "type": "Microsoft.Network/networkInterfaces",
+      //    "location": "[resourceGroup().location]",
+      //    "name": "[concat('NIC_vmMS', copyIndex(1))]",
+      //    "copy": {
+      //      "name": "nicLoop",
+      //      "count": "[parameters('numberOfInstancesMemberServer')]"
+      //    },
+      //    "dependsOn": [
+      //      // Do not include dependencies in other deployments
+      //      //"[variables('VnetID')]",
+      //      "[concat('Microsoft.Network/publicIPAddresses/', concat('PublicIP_vmMS', copyIndex(1)))]"
+      //    ],
+      //    "tags": {
+      //      "displayName": "vmMSX_NIC"
+      //    },
+      //    "properties": {
+      //      "ipConfigurations": [
+      //        {
+      //          "name": "ipconfig1",
+      //          "properties": {
+      //            "privateIPAllocationMethod": "Dynamic",
+      //            "subnet": {
+      //              "id": "[variables('SubnetRefBE')]"
+      //            },
+      //            "publicIPAddress": {
+      //              "id": "[resourceId( 'Microsoft.Network/publicIPAddresses', concat('PublicIP_vmMS', copyIndex(1)) )]"
+      //
+      //            }
+      //          }
+      //        }
+      //      ]
+      //    }
+      //  }
   ],
   "outputs": {
     //"MT1-fqdn": {

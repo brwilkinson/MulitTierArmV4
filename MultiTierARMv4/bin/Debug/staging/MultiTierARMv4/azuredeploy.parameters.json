@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "DeploymentID": {
-            "value": "400"
+            "value": "100"
         },
         "vmAdminPassword": {
             "reference": {
@@ -16,19 +16,10 @@
         "Environment": {
             "value": "Dev"
         },
-        "numberOfInstancesMidTierServer": {
-            "value": 1
-        },
         "numberOfInstancesSQLServer": {
             "value": 3
         },
-        "DSCUpdateTagVersion": {
-            "value": "2.0"
-        },
-        "numberOfInstancesMemberServer": {
-            "value": 1
-        },
-      "StorageAccountKeySource": {
+       "StorageAccountKeySource": {
         "reference": {
           "keyVault": {
             "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
