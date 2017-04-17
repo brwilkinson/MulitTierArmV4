@@ -47,7 +47,6 @@
       "type": "string",
       "defaultValue": "Contoso.com",
       "allowedValues": [
-        "Edge.com",
         "Contoso.com",
         "AlpineSkiHouse.com",
         "Fabrikam.com",
@@ -66,24 +65,6 @@
         "2012-R2-Datacenter",
         "2016-Datacenter"
       ]
-    },
-    "numberOfInstancesMemberServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Member Server VMs to deploy"
-      }
-    },
-    "numberOfInstancesMidTierServer": {
-      "type": "int",
-      "defaultValue": 2,
-      "minValue": 1,
-      "maxValue": 20,
-      "metadata": {
-        "description": "Number of Mid Tier Server VMs to deploy"
-      }
     },
     "numberOfInstancesSQLServer": {
       "type": "int",
@@ -113,7 +94,6 @@
         "description": "Name of the KeyVault, should choose keyvault in the same region as the deployment"
       },
       "allowedValues": [
-        "NACKeyValultEUS2",
         "kvcontosoeastus2",
         "kvcontosoeastus"
       ]
@@ -146,14 +126,16 @@
         "description": "This value must be changed from a previous deployment to ensure the DSC extensions will re-run"
       }
     },
-    "VnetID": {
-      "type": "string",
-      "defaultValue": "Do not use this yet, this value is generated via a Variable.",
+    "StorageAccountKeySource": {
+      "type": "securestring",
       "metadata": {
-        "description": "Enables the deployment into an existing VNet. e.g. /subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/MultiTierARMv3-01/providers/Microsoft.Network/VirtualNetworks/vnMSFTDev01"
+        "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "StorageAccountKeySource": {
+    "OMSworkspaceId": {
+      "type": "securestring"
+    },
+    "OMSKey": {
       "type": "securestring"
     }
   },
