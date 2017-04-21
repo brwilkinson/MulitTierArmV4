@@ -42,8 +42,7 @@
     <Content Include="DSC\WebMT-ConfigurationData.psd1" />
     <Content Include="DSC\WebFE-ConfigurationData.psd1" />
     <Content Include="DSC\JMP-ConfigurationData.psd1" />
-    <Content Include="7-azuredeployWebAppFirewall.json" />
-    <Content Include="azuredeploy.parameters-ALL.json" />
+    <Content Include="7-azuredeploy-WebAppFirewall.json" />
     <None Include="PrereqsToDeploy\CreateKeyVaultAndStoreSecrets.ps1" />
     <None Include="PrereqsToDeploy\CreateUploadCertificatestoKeyVault.ps1" />
     <None Include="Deployment.targets">

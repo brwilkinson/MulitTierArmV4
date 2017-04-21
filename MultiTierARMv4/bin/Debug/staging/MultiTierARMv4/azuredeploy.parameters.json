@@ -1,31 +1,63 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "DeploymentID": {
-            "value": "100"
+  "parameters": {
+    "DeploymentID": {
+      "value": "100"
+    },
+    "vmAdminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
         },
-        "vmAdminPassword": {
-            "reference": {
-                "keyVault": {
-                    "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
-                },
-                "secretName": "BRW"
-            }
+        "secretName": "BRW"
+      }
+    },
+    "Environment": {
+      "value": "Dev"
+    },
+    "numberOfInstancesSQLServer": {
+      "value": 3
+    },
+    "StorageAccountKeySource": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
         },
-        "Environment": {
-            "value": "Dev"
+        "secretName": "StorageAccountKeySource"
+      }
+    },
+    "OMSWorkspaceId": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS"
         },
-        "numberOfInstancesSQLServer": {
-            "value": 3
+        "secretName": "OMSWorkSpaceID"
+      }
+    },
+    "OMSKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
         },
-       "StorageAccountKeySource": {
-        "reference": {
-          "keyVault": {
-            "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
-          },
-          "secretName": "StorageAccountKeySource"
-        }
+        "secretName": "OMSKey"
+      }
+    },
+    "WildcardCertBase64": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
+        },
+        "secretName": "WildCardCertBase64"
+      }
+    },
+    "OMSWorkspaceId": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
+        },
+        "secretName": "OMSWorkSpaceID"
       }
     }
+  }
 }

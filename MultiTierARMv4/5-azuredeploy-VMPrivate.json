@@ -108,7 +108,6 @@
     "certificateUrl": {
       "type": "string",
       "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
-      //https://nackeyvalulteus2.vault.azure.net/secrets/edgewildcard/760cb3c809654460a0e9367cae1ed23a
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
@@ -119,6 +118,9 @@
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
+    },
+    "WildcardCertBase64": {
+      "type": "securestring"
     },
     "DSCUpdateTagVersion": {
       "type": "string",
@@ -133,10 +135,10 @@
         "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "OMSKey": {
+    "OMSWorkspaceId": {
       "type": "securestring"
     },
-    "OMSID": {
+    "OMSKey": {
       "type": "securestring"
     }
   },
@@ -405,7 +407,7 @@
             "typeHandlerVersion": "1.0",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "workspaceId": "[parameters('OMSId')]"
+              "workspaceId": "[parameters('OMSWorkspaceId')]"
             },
             "protectedSettings": {
               "workspaceKey": "[parameters('OMSKey')]"

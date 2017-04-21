@@ -120,6 +120,9 @@
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
     },
+    "WildcardCertBase64": {
+      "type": "securestring"
+    },
     "DSCUpdateTagVersion": {
       "type": "string",
       "defaultValue": "1.0",
@@ -133,7 +136,7 @@
         "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "OMSworkspaceId": {
+    "OMSWorkspaceId": {
       "type": "securestring"
     },
     "OMSKey": {
@@ -141,22 +144,26 @@
     }
   },
   "variables": {
+    "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
     "DeploymentInfoObject": [
-      {"DPStage" : "VNet"     ,"TemplateName" : "1-azuredeploy-VNet.json"     },
-      {"DPStage" : "Directory","TemplateName" : "2-azuredeploy-Directory.json"},
-      {"DPStage" : "DataBase" ,"TemplateName" : "3-azuredeploy-DataBase.json" },
-      {"DPStage" : "VMPrivate","TemplateName" : "4-azuredeploy-VMPublic.json"  },
-      {"DPStage" : "VMPublic" ,"TemplateName" : "5-azuredeploy-VMPrivate.json" },
-      {"DPStage" : "VMPublic" ,"TemplateName" : "6-azuredeploy-ILBalancer.json" },
-      {"DPStage" : "VMPublic" ,"TemplateName" : "7-azuredeployWebAppFirewall.json" }    
-    ]
+      {"DPStage" : "VNet"     ,  "TemplateName" : "1-azuredeploy-VNet.json"     },
+      {"DPStage" : "Directory",  "TemplateName" : "2-azuredeploy-Directory.json"}]
+//      {"DPStage" : "DataBase" ,  "TemplateName" : "3-azuredeploy-DataBase.json" }
+//      {"DPStage" : "VMPrivate",  "TemplateName" : "4-azuredeploy-VMPublic.json"  }
+//      {"DPStage" : "VMPublic" ,  "TemplateName" : "5-azuredeploy-VMPrivate.json" },
+//      {"DPStage" : "ILBalancer" ,"TemplateName" : "6-azuredeploy-ILBalancer.json" },
+//      {"DPStage" : "WAF" ,       "TemplateName" : "7-azuredeploy-WebAppFirewall.json" }    
+
   },
   "resources": [
     {
-      "name": "MultiTierDeploymentLoop",
+      "name": "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[copyIndex(0)].DPStage)]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [],
+      "tags": {
+        "displayName": "dpMultiTier"
+      },
       "copy": {
         "name": "vmLoop",
         "count": "[length(variables('DeploymentInfoObject'))]"

@@ -75,6 +75,18 @@
         "description": "Number of SQL Server VMs to deploy"
       }
     },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access artifactsLocation"
+      }
+    },
     "vaultName": {
       "type": "string",
       "defaultValue": "kvcontosoeastus2",
@@ -107,6 +119,9 @@
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
     },
+    "WildcardCertBase64": {
+      "type": "securestring"
+    },
     "DSCUpdateTagVersion": {
       "type": "string",
       "defaultValue": "1.0",
@@ -120,7 +135,7 @@
         "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "OMSworkspaceId": {
+    "OMSWorkspaceId": {
       "type": "securestring"
     },
     "OMSKey": {
@@ -143,21 +158,21 @@
     "LBInfo": [
       {
         "LBFEName": "SQLAlwaysOn_EDG01",
-        "LBFEIP": "10.144.135.100",
+        "LBFEIP": "10.0.1.100",
         "LBFEPort": 1433,
         "LBBEPort": 1433,
         "LBBEProbePort": 59999
       },
       {
         "LBFEName": "SQLAlwaysOn_EDG02",
-        "LBFEIP": "10.144.135.101",
+        "LBFEIP": "10.0.1.101",
         "LBFEPort": 1433,
         "LBBEPort": 1432,
         "LBBEProbePort": 59998
       },
       {
         "LBFEName": "SQLAlwaysOn_OCR01",
-        "LBFEIP": "10.144.135.102",
+        "LBFEIP": "10.0.1.102",
         "LBFEPort": 1433,
         "LBBEPort": 1431,
         "LBBEProbePort": 59997

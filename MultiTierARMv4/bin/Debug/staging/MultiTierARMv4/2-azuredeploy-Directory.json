@@ -119,6 +119,9 @@
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
     },
+    "WildcardCertBase64": {
+      "type": "securestring"
+    },
     "DSCUpdateTagVersion": {
       "type": "string",
       "defaultValue": "1.0",
@@ -132,7 +135,7 @@
         "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "OMSworkspaceId": {
+    "OMSWorkspaceId": {
       "type": "securestring"
     },
     "OMSKey": {

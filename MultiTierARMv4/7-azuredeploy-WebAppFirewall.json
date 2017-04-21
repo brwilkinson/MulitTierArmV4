@@ -75,6 +75,18 @@
         "description": "Number of SQL Server VMs to deploy"
       }
     },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access artifactsLocation"
+      }
+    },
     "vaultName": {
       "type": "string",
       "defaultValue": "kvcontosoeastus2",
@@ -95,7 +107,7 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://nackeyvalulteus2.vault.azure.net:443/secrets/titleeditorwildcard/38d2efc026cf4ed4b0346d129fecb74c",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
@@ -123,7 +135,7 @@
         "description": "Used for copying source files to DSC from Azure Files storage"
       }
     },
-    "OMSworkspaceId": {
+    "OMSWorkspaceId": {
       "type": "securestring"
     },
     "OMSKey": {
@@ -207,7 +219,7 @@
               "password": "[parameters('vmAdminPassword')]",
               "publicCertData": "[parameters('WildcardCertBase64')]"
             },
-            "name": "titleeditorwildcardMulti"
+            "name": "WildcardMulti"
           }
         ],
         "gatewayIPConfigurations": [
