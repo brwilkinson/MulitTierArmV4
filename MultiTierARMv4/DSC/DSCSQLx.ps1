@@ -274,8 +274,9 @@ Node $AllNodes.NodeName
 
     xSQLServerRole svcSQLRole
     {
-        Name            = $SQLSvcAccount
-        ServerRole      = 'sysadmin'  # bulkadmin | dbcreator | diskadmin | processadmin | public | securityadmin | serveradmin | setupadmin | 'sysadmin'
+        MembersToInclude = $SQLSvcAccount
+		#Name            = $SQLSvcAccount
+        ServerRoleName      = 'sysadmin'  # bulkadmin | dbcreator | diskadmin | processadmin | public | securityadmin | serveradmin | setupadmin | 'sysadmin'
 		SQLServer       = $ENV:ComputerName
 		SQLInstanceName = $Node.InstanceName
         DependsOn      = '[xSqlServerSetup]xSqlServerInstall'
@@ -349,7 +350,7 @@ Node $AllNodes.Where{$_.Role -eq "PrimaryClusterNode"}.NodeName
        {
             Ensure          = "Present"
             Port            = 5022
-            AuthorizedUser  = $SQLSvcAccount
+		    #AuthorizedUser  = $SQLSvcAccount
             EndPointName    = "Hadr_endpoint"
             SQLServer       = $ENV:ComputerName
 		    SQLInstanceName = $Node.InstanceName

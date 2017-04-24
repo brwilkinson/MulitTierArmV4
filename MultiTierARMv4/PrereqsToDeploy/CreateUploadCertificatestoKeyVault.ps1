@@ -5,7 +5,7 @@
 # The deployment automatically installs this Cert in all required stores for it to be trusted.
 $kVaultName = 'kvContoso'
 $rgName = 'rgContosoGlobal'
-$CertPath = 'D:\Azure'
+$CertPath = 'D:\Azure\Certs'
 #--------------------------------------------------------
 # Create Web cert *.contoso.com
 $cert = New-SelfSignedCertificate -DnsName *.contoso.com -CertStoreLocation Cert:\LocalMachine\My
@@ -15,8 +15,9 @@ Export-PfxCertificate -Password $PW -FilePath $CertPath\contosowildcard.pfx -Cer
 Export-Certificate -FilePath $CertPath\contosowildcard.cer -Cert $cert 
 
 #--------------------------------------------------------
-# Upload certs to KeyVault
+<# Upload certs to KeyVault
 
+This is the old code
 $FileName = "$CertPath\contosowildcard.pfx"
 
 $certPassword = Read-Host -Prompt EnterPlainTextPassword
@@ -37,6 +38,12 @@ $jsonEncoded     = [System.Convert]::ToBase64String($jsonObjectBytes)
 
 $secret = ConvertTo-SecureString -String $jsonEncoded -AsPlainText -Force
 Set-AzureKeyVaultSecret -VaultName $kVaultName -Name contosowildcard -SecretValue $secret
+#>
+
+# This is the new code
+$PW = Read-Host -AsSecureString
+Import-AzureKeyVaultCertificate -FilePath $CertPath\contosowildcard.pfx -Name ContosoWildcard -VaultName $kVaultName -Password $PW
+
 
 $contosowildcard = Get-AzureKeyVaultSecret -VaultName $kVaultName -Name contosowildcard
 $contosowildcard.Id

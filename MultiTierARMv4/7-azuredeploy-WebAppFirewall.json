@@ -107,14 +107,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "606295CAE217319DC730F8F16D52C6BEF636047B",
+      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }

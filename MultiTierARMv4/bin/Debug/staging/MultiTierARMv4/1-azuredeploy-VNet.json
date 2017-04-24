@@ -107,14 +107,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/e3b3f88a088b4eadafd4fa6f924877f5",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "D619F4B333D657325C976F97B7EF5977E740E791",
+      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
@@ -159,20 +159,24 @@
 
     // 4 Subnets, FrontEnd, MidTier, BackEnd and Directory
     // snMSFTDev10-01
-    "snName01": "[concat('sn', variables('Deployment'),'-FE')]",
-    "snName01Prefix": "10.0.3.0/24",
+    "snName01": "[concat('sn', variables('Deployment'),'-Directory')]",
+    "snName01Prefix": "10.0.0.0/24",
 
     // snMSFTDev10-02
-    "snName02": "[concat('sn', variables('Deployment'),'-MT')]",
-    "snName02Prefix": "10.0.2.0/24",
+    "snName02": "[concat('sn', variables('Deployment'),'-BE')]",
+    "snName02Prefix": "10.0.1.0/24",
 
-    // snMSFTDev10-02
-    "snName03": "[concat('sn', variables('Deployment'),'-BE')]",
-    "snName03Prefix": "10.0.1.0/24",
+    // snMSFTDev10-03
+    "snName03": "[concat('sn', variables('Deployment'),'-MT')]",
+    "snName03Prefix": "10.0.2.0/24",
 
-    // snMSFTDev10-02
-    "snName04": "[concat('sn', variables('Deployment'),'-Directory')]",
-    "snName04Prefix": "10.0.0.0/24",
+    // snMSFTDev10-04
+    "snName04": "[concat('sn', variables('Deployment'),'-FE')]",
+    "snName04Prefix": "10.0.3.0/24",
+
+    // snMSFTDev10-05
+    "snName05": "[concat('sn', variables('Deployment'),'-Gateway')]",
+    "snName05Prefix": "10.0.4.0/24",
 
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', concat('vn',Variables('Deployment')))]"
 
@@ -224,6 +228,12 @@
             "properties": {
               "addressPrefix": "[variables('snName04Prefix')]"
             }
+          },
+          {
+            "name": "[variables('snName05')]",
+            "properties": {
+              "addressPrefix": "[variables('snName05Prefix')]"
+            }
           }
         ]
       }
@@ -268,6 +278,14 @@
     },
     "VNet-Subnet-04-addressPrefix": {
       "value": "[reference(variables('VnetID'), '2015-06-15').subnets[3].properties.addressPrefix]",
+      "type": "string"
+    },
+    "VNet-Subnet-05": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[4].Name]",
+      "type": "string"
+    },
+    "VNet-Subnet-05-addressPrefix": {
+      "value": "[reference(variables('VnetID'), '2015-06-15').subnets[4].properties.addressPrefix]",
       "type": "string"
     },
     "NetworkID": {
