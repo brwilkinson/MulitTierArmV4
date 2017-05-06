@@ -7,8 +7,8 @@ Param (
 		[PSCredential]$AdminCreds,
 		[Int]$RetryCount = 20,
 		[Int]$RetryIntervalSec = 120,
-        $ThumbPrint = '606295CAE217319DC730F8F16D52C6BEF636047B',
-        $StorageAccountKeySource
+        [String]$ThumbPrint = '606295CAE217319DC730F8F16D52C6BEF636047B',
+        [String]$StorageAccountKeySource
 		)
 
 
@@ -24,7 +24,6 @@ Import-DscResource -ModuleName SecurityPolicyDSC
 
 [PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ("$DomainName\$(($AdminCreds.UserName -split '\\')[-1])", $AdminCreds.Password)
 
-#Node $AllNodes.NodeName
 node $AllNodes.NodeName
 {
     if($NodeName -eq "localhost") {
@@ -178,7 +177,7 @@ node $AllNodes.NodeName
 
 	#-------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------------------------------------------
+	#-----------------------------------------------------------------------------------------------------------------------------
 
     #To clean up resource names use a regular expression to remove spaces, slashes an colons
     $StringFilter = "\\|\s|:",''

@@ -172,9 +172,6 @@
     //"vmSize": "Standard_D1",
     "vmImagePublisher": "MicrosoftWindowsServer",
     "vmImageOffer": "WindowsServer",
-    "vmStorageContainerName": "vhds",
-
-    "Domain": "[split(parameters('vmDomainName'),'.')[0]]",
 
     //DSC
     "DSCArchiveFolder": "DSC",
@@ -256,7 +253,8 @@
         "count": "[length(variables('AppServers'))]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', concat('NIC_vm',variables('AppServers')[copyIndex(0)].VMName))]"
+        "[concat('Microsoft.Network/networkInterfaces/', concat('NIC_vm',variables('AppServers')[copyIndex(0)].VMName))]",
+        "[concat('Microsoft.Compute/availabilitySets/', concat('as',variables('Deployment'), '-',variables('AppServers')[copyIndex(0)].Role))]"
       ],
       "tags": {
         "displayName": "vmMTX",
@@ -356,14 +354,14 @@
                 "script": "[variables('DSCAppRolesFileName')]",
                 "function": "Main"
               },
-              "configurationArguments": {
-                "DomainName": "[parameters('vmDomainName')]",
-                "Thumbprint": "[parameters('certificateThumbprint')]",
-                "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
-              },
               "configurationData": {
                 "url": "[concat(variables('ConfigDataPath'),variables('AppServers')[copyIndex(0)].Role,'-',variables('ConfigDataFileNameBase'))]"
               }
+            },
+            "configurationArguments": {
+              "DomainName": "[parameters('vmDomainName')]",
+              "Thumbprint": "[parameters('certificateThumbprint')]",
+              "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
             },
             "protectedSettings": {
               "configurationArguments": {
@@ -399,28 +397,7 @@
           }
         }
       ]
-    }//,
-    //{
-    //  "type": "Microsoft.Network/publicIPAddresses",
-    //  "location": "[resourceGroup().location]",
-    //  "apiVersion": "2015-06-15",
-    //  "name": "[concat('PublicIP_vm',variables('AppServers')[copyIndex(0)].VMName)]",
-    //  "copy": {
-    //    "name": "PublicIPLoop",
-    //    "count": "[length( variables('AppServers') )]"
-    //  },
-    //
-    //  "dependsOn": [],
-    //  "tags": {
-    //    "displayName": "vmMTX_PublicIP"
-    //  },
-    //  "properties": {
-    //    "publicIPAllocationMethod": "[variables('AppServers')[copyIndex(0)].PublicIPType]",
-    //    "dnsSettings": {
-    //      "domainNameLabel": "[toLower( concat(variables('Domain'),'vm', variables('Deployment'), variables('AppServers')[copyIndex(0)].VMName ) ) ]"
-    //    }
-    //  }
-    //}
+    }
   ],
   "outputs": {
     //"MT1-fqdn": {

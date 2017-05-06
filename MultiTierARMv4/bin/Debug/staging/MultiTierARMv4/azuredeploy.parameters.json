@@ -30,7 +30,7 @@
     "OMSWorkspaceId": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS"
+          "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
         },
         "secretName": "OMSWorkSpaceID"
       }
@@ -53,6 +53,9 @@
     },
     "certificateUrl": {
       "value": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01"
+    },
+    "DSCUpdateTagVersion": {
+      "value": "2.0"
     }
   }
 }

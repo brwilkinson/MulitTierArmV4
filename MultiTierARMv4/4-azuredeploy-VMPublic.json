@@ -254,7 +254,8 @@
         },
         "dependsOn": [
           "[concat('Microsoft.Network/networkInterfaces/', concat('NIC_vm',variables('AppServers')[copyIndex(0)].VMName))]",
-          "[concat('Microsoft.Network/publicIPAddresses/', concat('PublicIP_vm',variables('AppServers')[copyIndex(0)].VMName))]"
+          "[concat('Microsoft.Network/publicIPAddresses/', concat('PublicIP_vm',variables('AppServers')[copyIndex(0)].VMName))]",
+          "[concat('Microsoft.Compute/availabilitySets/', concat('as',variables('Deployment'), '-',variables('AppServers')[copyIndex(0)].Role))]"
         ],
         "tags": {
           "displayName": "vmMTX",

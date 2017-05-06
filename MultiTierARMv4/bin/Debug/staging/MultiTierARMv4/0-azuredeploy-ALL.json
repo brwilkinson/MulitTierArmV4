@@ -153,8 +153,8 @@
       {"DPStage" : "VNet"     ,  "TemplateName" : "1-azuredeploy-VNet.json"     },
       {"DPStage" : "Directory",  "TemplateName" : "2-azuredeploy-Directory.json"},
       {"DPStage" : "WAF" ,       "TemplateName" : "7-azuredeploy-WebAppFirewall.json" },
-      {"DPStage" : "VMPublic" ,  "TemplateName" : "5-azuredeploy-VMPrivate.json" },
-      {"DPStage" : "VMPrivate",  "TemplateName" : "4-azuredeploy-VMPublic.json"  }
+      {"DPStage" : "VMPublic" ,  "TemplateName" : "4-azuredeploy-VMPublic.json" },
+      {"DPStage" : "VMPrivate",  "TemplateName" : "5-azuredeploy-VMPrivate.json"  }
 
     ]
   },
