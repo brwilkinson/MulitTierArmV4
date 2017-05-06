@@ -15,22 +15,26 @@
     // Network
     "snPrefix": "10.0.0.0/16",
 
-    // 4 Subnets, FrontEnd, MidTier, BackEnd and Directory
+    // 5 Subnets: Directory, BackEnd, MidTier, FrontEnd & Gateway
     // snMSFTDev10-01
-    "snName01": "[concat('sn', parameters('Deployment'),'-FE')]",
-    "snName01Prefix": "10.0.3.0/24",
+    "snName01": "[concat('sn', Parameters('Deployment'),'-Directory')]",
+    "snName01Prefix": "10.0.0.0/24",
 
     // snMSFTDev10-02
-    "snName02": "[concat('sn', parameters('Deployment'),'-MT')]",
-    "snName02Prefix": "10.0.2.0/24",
+    "snName02": "[concat('sn', Parameters('Deployment'),'-BE')]",
+    "snName02Prefix": "10.0.1.0/24",
 
-    // snMSFTDev10-02
-    "snName03": "[concat('sn', parameters('Deployment'),'-BE')]",
-    "snName03Prefix": "10.0.1.0/24",
+    // snMSFTDev10-03
+    "snName03": "[concat('sn', Parameters('Deployment'),'-MT')]",
+    "snName03Prefix": "10.0.2.0/24",
 
-    // snMSFTDev10-02
-    "snName04": "[concat('sn', parameters('Deployment'),'-Directory')]",
-    "snName04Prefix": "10.0.0.0/24",
+    // snMSFTDev10-04
+    "snName04": "[concat('sn', Parameters('Deployment'),'-FE')]",
+    "snName04Prefix": "10.0.3.0/24",
+
+    // snMSFTDev10-05
+    "snName05": "[concat('sn', Parameters('Deployment'),'-Gateway')]",
+    "snName05Prefix": "10.0.4.0/24",
 
     // subscriptionId
     "subscriptionId": "[subscription().subscriptionId]",
@@ -85,6 +89,12 @@
             "name": "[variables('snName04')]",
             "properties": {
               "addressPrefix": "[variables('snName04Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('snName05')]",
+            "properties": {
+              "addressPrefix": "[variables('snName05Prefix')]"
             }
           }
         ]

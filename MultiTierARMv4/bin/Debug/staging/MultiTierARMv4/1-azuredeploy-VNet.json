@@ -107,14 +107,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
+      "defaultValue": "78F957B6738273FA67C9756944E52FA0C1AAF307",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
@@ -156,8 +156,9 @@
 
     // DNS from 1st Domain Controller
     "DC1PrivateIPAddress": "10.0.0.10",
+    "DC2PrivateIPAddress": "10.0.0.11",
 
-    // 4 Subnets, FrontEnd, MidTier, BackEnd and Directory
+    // 5 Subnets: Directory, BackEnd, MidTier, FrontEnd & Gateway
     // snMSFTDev10-01
     "snName01": "[concat('sn', variables('Deployment'),'-Directory')]",
     "snName01Prefix": "10.0.0.0/24",
@@ -200,7 +201,7 @@
         "dhcpOptions": {
           "dnsServers": [
             "[variables('DC1PrivateIPAddress')]",
-            //"[variables('DC2PrivateIPAddress')]",
+            //"[variables('DC2PrivateIPAddress')]"
             "8.8.8.8"
           ]
         },

@@ -107,14 +107,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
+      "defaultValue": "78F957B6738273FA67C9756944E52FA0C1AAF307",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
@@ -153,16 +153,16 @@
     "resourceGroupName": "[resourceGroup().name]",
 
     "AppRoles": [
-        {"Role" : "WebFE", "StorageType" : "Standard_LRS" },
-        {"Role" : "WebMT", "StorageType" : "Standard_LRS" }
+        {"Role" : "WebFE" },
+        {"Role" : "WebMT" }
     ],
 
     "AppServers": [
-            {"VMName":"WebFE01","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE"},
-            {"VMName":"WebFE02","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE"},
+            {"VMName":"WebFE01","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE", "StorageType" : "Standard_LRS"},
+            {"VMName":"WebFE02","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE", "StorageType" : "Standard_LRS"},
             
-            {"VMName":"WebMT01","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT"},
-            {"VMName":"WebMT02","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT"}
+            {"VMName":"WebMT01","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT", "StorageType" : "Standard_LRS"},
+            {"VMName":"WebMT02","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT", "StorageType" : "Standard_LRS"}
       ],
 
     // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead
@@ -190,28 +190,14 @@
   },
   "resources": [
     {
-      "name": "[toLower( concat('sa', variables('Deployment'), variables('AppRoles')[copyIndex()].Role ) )]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [],
-      "copy": {
-        "name": "saLoop",
-        "count": "[length( variables('AppRoles') )]"
-      },
-      "tags": {
-        "displayName": "saName"
-      },
-      "properties": {
-        "accountType": "[variables('AppRoles')[copyIndex()].StorageType]"
-      }
-    },
-    {
       "name": "[concat('as',variables('Deployment'),'-',variables('AppRoles')[copyIndex()].Role)]",
       "type": "Microsoft.Compute/availabilitySets",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
       "dependsOn": [],
+      "sku": {
+        "name": "Aligned"
+      },
       "copy": {
         "name": "asLoop",
         "count": "[length( variables('AppRoles') )]"
@@ -263,16 +249,14 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
       "name": "[concat('vm', variables('Deployment'), variables('AppServers')[copyIndex(0)].VMName)]",
       "copy": {
         "name": "vmLoop",
         "count": "[length(variables('AppServers'))]"
       },
       "dependsOn": [
-        "[tolower(concat('Microsoft.Storage/storageAccounts/','sa',variables('Deployment'), variables('AppServers')[copyIndex(0)].Role))]",
         "[concat('Microsoft.Network/networkInterfaces/', concat('NIC_vm',variables('AppServers')[copyIndex(0)].VMName))]"
-        //"[concat('Microsoft.Network/publicIPAddresses/', concat('PublicIP_vm',variables('AppServers')[copyIndex(0)].VMName))]"
       ],
       "tags": {
         "displayName": "vmMTX",
@@ -320,22 +304,22 @@
           },
           "osDisk": {
             "name": "[concat(variables('AppServers')[copyIndex(0)].VMName, '_vmosDisk')]",
-            "vhd": {
-              "uri": "[tolower(concat('http://', 'sa',variables('Deployment'), variables('AppServers')[copyIndex(0)].Role, '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('AppServers')[copyIndex(0)].VMName, '_vmOsDisk', '.vhd'))]"
-            },
             "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('AppServers')[copyIndex(0)].StorageType]"
+            }
           },
           "dataDisks": [
             {
               "name": "[concat(variables('AppServers')[copyIndex(0)].VMName, '_vmDataDisk')]",
               "lun": 0,
-              "vhd": {
-                "uri": "[tolower(concat('http://', 'sa',variables('Deployment'), variables('AppServers')[copyIndex(0)].Role, '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('AppServers')[copyIndex(0)].VMName, '_vmDataDisk', '.vhd'))]"
-              },
               "caching": "ReadWrite",
               "diskSizeGB": "127",
-              "createOption": "Empty"
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "[variables('AppServers')[copyIndex(0)].StorageType]"
+              }
             }
           ]
         },

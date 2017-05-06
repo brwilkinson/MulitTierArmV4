@@ -5,7 +5,7 @@
     // Global
     "DeploymentID": {
       "type": "string",
-      "defaultValue": "101",
+      "defaultValue": "01",
       "minLength": 2
     },
     "Prefix": {
@@ -27,9 +27,6 @@
       "defaultValue": "Standard_LRS",
       "allowedValues": [
         "Standard_LRS",
-        "Standard_ZRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
         "Premium_LRS"
       ]
     },
@@ -108,14 +105,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
+      "defaultValue": "78F957B6738273FA67C9756944E52FA0C1AAF307",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
@@ -145,33 +142,52 @@
   },
   "variables": {
     "Deployment": "[concat(parameters('Prefix'),parameters('Environment'),parameters('DeploymentID'))]",
-    "DeploymentInfoObject": [
-      {"DPStage" : "VNet"     ,  "TemplateName" : "1-azuredeploy-VNet.json"     },
-      {"DPStage" : "Directory",  "TemplateName" : "2-azuredeploy-Directory.json"}]
+    
 //      {"DPStage" : "DataBase" ,  "TemplateName" : "3-azuredeploy-DataBase.json" }
 //      {"DPStage" : "VMPrivate",  "TemplateName" : "4-azuredeploy-VMPublic.json"  }
 //      {"DPStage" : "VMPublic" ,  "TemplateName" : "5-azuredeploy-VMPrivate.json" },
 //      {"DPStage" : "ILBalancer" ,"TemplateName" : "6-azuredeploy-ILBalancer.json" },
-//      {"DPStage" : "WAF" ,       "TemplateName" : "7-azuredeploy-WebAppFirewall.json" }    
+//       
+    
+    "DeploymentInfoObject": [
+      {"DPStage" : "VNet"     ,  "TemplateName" : "1-azuredeploy-VNet.json"     },
+      {"DPStage" : "Directory",  "TemplateName" : "2-azuredeploy-Directory.json"},
+      {"DPStage" : "WAF" ,       "TemplateName" : "7-azuredeploy-WebAppFirewall.json" },
+      {"DPStage" : "VMPublic" ,  "TemplateName" : "5-azuredeploy-VMPrivate.json" },
+      {"DPStage" : "VMPrivate",  "TemplateName" : "4-azuredeploy-VMPublic.json"  }
 
+    ]
   },
   "resources": [
     {
-      "name": "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[copyIndex(0)].DPStage)]",
+      "name": "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[0].DPStage)]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [],
-      "tags": {
-        "displayName": "dpMultiTier"
-      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DeploymentInfoObject')[0].TemplateName, parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": "[deployment().properties.parameters]"
+      }
+    },
+    {
+      "name": "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[copyIndex(1)].DPStage)]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[concat('dp', variables('Deployment'), variables('DeploymentInfoObject')[sub(copyIndex(1),1)].DPStage)]"
+      ],
       "copy": {
         "name": "dpLoop",
-        "count": "[length(variables('DeploymentInfoObject'))]"
+        "count": "[sub(length(variables('DeploymentInfoObject')),1)]"
       },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DeploymentInfoObject')[copyIndex(0)].TemplateName, parameters('_artifactsLocationSasToken'))]",
+          "uri": "[concat(parameters('_artifactsLocation'), '/', variables('DeploymentInfoObject')[copyIndex(1)].TemplateName, parameters('_artifactsLocationSasToken'))]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": "[deployment().properties.parameters]"

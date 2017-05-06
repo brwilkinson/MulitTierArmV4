@@ -107,14 +107,14 @@
     },
     "certificateUrl": {
       "type": "string",
-      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982",
+      "defaultValue": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01",
       "metadata": {
         "description": "Url of the certificate with version in KeyVault e.g. https://testault.vault.azure.net/secrets/testcert/dsfsdffdsfdsfdsfdsfdsfdsdsffsd"
       }
     },
     "certificateThumbprint": {
       "type": "string",
-      "defaultValue": "13E7C6EB43EAF1D08F708A204C3BA7AD9E46F166",
+      "defaultValue": "78F957B6738273FA67C9756944E52FA0C1AAF307",
       "metadata": {
         "description": "Thee ThumbPrint of the certificate in KeyVault that will be used on the Web Servers"
       }
@@ -165,8 +165,8 @@
         "WAFSize": "WAF_Medium",
         "WAFCapacity": 2,
         "FQDNs": [
-          { "fqdn": "WebMT01.titleeditor.com" },
-          { "fqdn": "WebMT01.titleeditor.com" }
+          { "fqdn": "WebMT01.Contoso.com" },
+          { "fqdn": "WebMT02.Contoso.com" }
         ]
       },
       {
@@ -176,8 +176,8 @@
         "WAFSize": "WAF_Medium",
         "WAFCapacity": 2,
         "FQDNs": [
-          { "fqdn": "WebFEO1.titleeditor.com" },
-          { "fqdn": "WebFEO2.titleeditor.com" }
+          { "fqdn": "WebFEO1.Contoso.com" },
+          { "fqdn": "WebFEO2.Contoso.com" }
         ]
       }
     ]
@@ -207,9 +207,9 @@
         "authenticationCertificates": [
           {
             "properties": {
-              "data": "[parameters('WildcardCertBase64')]"
+              "data": "MIIDYDCCAkigAwIBAgIQWCrxL82dyJpF0u4uifepezANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA0qLmNvbnRvc28uY29tMB4XDTE3MDUwNjE1MDAxMVoXDTIyMDUwNjE1MTAxMVowGDEWMBQGA1UEAwwNKi5jb250b3NvLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMI/CWpAhEyf1crhHVa8fPBwUod7JTc8PicSu9Qok6PotJR14+C3NRw7zzMSTpRNbD8xeIyBoazJwllbNnLJB5Fup12G6BT2AkfchwN/OPF5dqjHB5GRIh5F/tGDijGLE2fgvfGsJTLaMU215PIs8MJO0fnDg7Zk8jy4dSbMyQTDyq33qpUqgNWieqiZ9mFemD4LXP2LcgoMJL6OxtwEul8LRzXoHwk0guutfNcnoZd/v1nw2o5u2/vhXJ2qvMbrWn2LMYCnlADxgfVxJS5ouwKeZbdZ5SrJxuv743co6dEkEGruksokv8dgWRpFuTzpomG0McrW3ePwLqMet5Dlpe0CAwEAAaOBpTCBojAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMFIGA1UdEQRLMEmCDSouY29udG9zby5jb22CFCouQWxwaW5lU2tpSG91c2UuY29tgg4qLkZhYnJpa2FtLmNvbYISKi5UcmV5UmVzZWFyY2gubmV0MB0GA1UdDgQWBBR8UMMYWKMkoW/6y31IHUVtvnLnqTANBgkqhkiG9w0BAQsFAAOCAQEAl0lF+TE0ZbnaxOmPdK7d2k/lnk/uTC5vvnSjcHPzr0rIKaQ3a1a23f7v3KxxfU2iUHn1ZhlwKaNPW/me+v4P1IIB/51lka8VT1bV9yhjb67CLERWRbN/JT4T+0jenaKuT2NDaeeiOGeJNYgGbDhPInkjgv2fznkB8ZNB8Fo7mv0dxfW2cWRRaQHRzEKsK0VczahWQiH+PqDq7rD/AWgF2jn0JIF6AeFK1prERcr2XTLUPCDVHJ1oRckDJdA9wfjYFcsQy2n29u0NdaG1XRZmYSmvst68JKTTWEYHPi7TULo9yUdeL7YGARpjLg58td2ZATv2isG7bkxnbQZWghyDUA=="
             },
-            "name": "WildcardMulti"
+            "name": "MultiDomainwildcardBase64Public"
           }
         ],
         "sslCertificates": [
@@ -217,9 +217,9 @@
             "properties": {
               "data": "[parameters('WildcardCertBase64')]",
               "password": "[parameters('vmAdminPassword')]",
-              "publicCertData": "[parameters('WildcardCertBase64')]"
+              "publicCertData": "MIIDYDCCAkigAwIBAgIQWCrxL82dyJpF0u4uifepezANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA0qLmNvbnRvc28uY29tMB4XDTE3MDUwNjE1MDAxMVoXDTIyMDUwNjE1MTAxMVowGDEWMBQGA1UEAwwNKi5jb250b3NvLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMI/CWpAhEyf1crhHVa8fPBwUod7JTc8PicSu9Qok6PotJR14+C3NRw7zzMSTpRNbD8xeIyBoazJwllbNnLJB5Fup12G6BT2AkfchwN/OPF5dqjHB5GRIh5F/tGDijGLE2fgvfGsJTLaMU215PIs8MJO0fnDg7Zk8jy4dSbMyQTDyq33qpUqgNWieqiZ9mFemD4LXP2LcgoMJL6OxtwEul8LRzXoHwk0guutfNcnoZd/v1nw2o5u2/vhXJ2qvMbrWn2LMYCnlADxgfVxJS5ouwKeZbdZ5SrJxuv743co6dEkEGruksokv8dgWRpFuTzpomG0McrW3ePwLqMet5Dlpe0CAwEAAaOBpTCBojAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMFIGA1UdEQRLMEmCDSouY29udG9zby5jb22CFCouQWxwaW5lU2tpSG91c2UuY29tgg4qLkZhYnJpa2FtLmNvbYISKi5UcmV5UmVzZWFyY2gubmV0MB0GA1UdDgQWBBR8UMMYWKMkoW/6y31IHUVtvnLnqTANBgkqhkiG9w0BAQsFAAOCAQEAl0lF+TE0ZbnaxOmPdK7d2k/lnk/uTC5vvnSjcHPzr0rIKaQ3a1a23f7v3KxxfU2iUHn1ZhlwKaNPW/me+v4P1IIB/51lka8VT1bV9yhjb67CLERWRbN/JT4T+0jenaKuT2NDaeeiOGeJNYgGbDhPInkjgv2fznkB8ZNB8Fo7mv0dxfW2cWRRaQHRzEKsK0VczahWQiH+PqDq7rD/AWgF2jn0JIF6AeFK1prERcr2XTLUPCDVHJ1oRckDJdA9wfjYFcsQy2n29u0NdaG1XRZmYSmvst68JKTTWEYHPi7TULo9yUdeL7YGARpjLg58td2ZATv2isG7bkxnbQZWghyDUA=="
             },
-            "name": "WildcardMulti"
+            "name": "MultiDomainwildcard"
           }
         ],
         "gatewayIPConfigurations": [
@@ -286,7 +286,7 @@
               "RequestTimeout": 600,
               "authenticationCertificates": [
                 {
-                  "id": "[concat(resourceId('Microsoft.Network/applicationGateways/', concat('WAF_', variables('Deployment'),'_', variables('WAFInfo')[copyIndex(0)].WAFName)),'/authenticationCertificates/titleeditorwildcardMulti' )]"
+                  "id": "[concat(resourceId('Microsoft.Network/applicationGateways/', concat('WAF_', variables('Deployment'),'_', variables('WAFInfo')[copyIndex(0)].WAFName)),'/authenticationCertificates/MultiDomainwildcardBase64Public' )]"
                 }
               ]
             }
@@ -320,7 +320,7 @@
               "Protocol": "Https",
 
               "SslCertificate": {
-                "id": "[concat(resourceId('Microsoft.Network/applicationGateways/', concat('WAF_', variables('Deployment'),'_', variables('WAFInfo')[copyIndex(0)].WAFName)),'/sslCertificates/titleeditorwildcardMulti' )]"
+                "id": "[concat(resourceId('Microsoft.Network/applicationGateways/', concat('WAF_', variables('Deployment'),'_', variables('WAFInfo')[copyIndex(0)].WAFName)),'/sslCertificates/MultiDomainwildcard' )]"
               }
             }
           }

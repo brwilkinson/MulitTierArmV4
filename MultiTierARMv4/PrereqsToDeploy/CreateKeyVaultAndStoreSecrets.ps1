@@ -1,9 +1,14 @@
 #
 # CreateKeyVaultAndStoreSecrets.ps1
 #
-$kVaultName = 'kvContoso'
 $rgName = 'rgContosoGlobal'
+
+$kVaultName = 'kvContosoEastUS2'
+$location = 'EastUS2'
+# You will want to do this in all regions where you deploy
+$kVaultName = 'kvContosoEastUS'
 $location = 'EastUS'
+
 $AdminUserName = 'EricLang'
 
 New-AzureRmResourceGroup -Name $rgName -Location $Location

@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
   "parameters": {
     "DeploymentID": {
-      "value": "02"
+      "value": "01"
     },
     "vmAdminPassword": {
       "reference": {
@@ -48,11 +48,11 @@
         "keyVault": {
           "id": "/subscriptions/b8f402aa-20f7-4888-b45c-3cf086dad9c3/resourceGroups/rgGlobal/providers/Microsoft.KeyVault/vaults/kvContosoEastUS2"
         },
-        "secretName": "WildCardCertBase64"
+        "secretName": "MultiDomainwildcardBase64"
       }
     },
     "certificateUrl": {
-      "value": "https://kvcontosoeastus2.vault.azure.net:443/secrets/ContosoWildcard/17577a789d86407baf12135286650982"
+      "value": "https://kvcontosoeastus2.vault.azure.net:443/secrets/MultiDomainwildcard/07534e07585c4f6ba3ffd1769af55d01"
     }
   }
 }
