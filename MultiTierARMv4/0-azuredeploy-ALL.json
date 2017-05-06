@@ -165,7 +165,7 @@
         "displayName": "dpMultiTier"
       },
       "copy": {
-        "name": "vmLoop",
+        "name": "dpLoop",
         "count": "[length(variables('DeploymentInfoObject'))]"
       },
       "properties": {

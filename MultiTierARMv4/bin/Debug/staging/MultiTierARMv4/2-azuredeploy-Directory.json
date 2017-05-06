@@ -27,9 +27,6 @@
       "defaultValue": "Standard_LRS",
       "allowedValues": [
         "Standard_LRS",
-        "Standard_ZRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
         "Premium_LRS"
       ]
     },
@@ -148,7 +145,7 @@
 
     // saBRWDev101directory
     // sabrwdev101directory
-    "saName": "[toLower(concat('sa', variables('Deployment'),'directory'))]",
+    //"saName": "[toLower(concat('sa', variables('Deployment'),'directory'))]",
 
     // DC AvailabilitySetName
     "asName": "[concat('as', variables('Deployment'),'-Directory')]",
@@ -182,18 +179,18 @@
     //  vmBRWDev01DC1
     //  vmBRWDev02DC1
     "DC1vmName": "[concat('vm', variables('Deployment'),'DC1')]",
-    "DC1vmOSDiskName": "[concat(variables('DC1vmName'),'_vmOSDisk')]",
-    "DC1vmDataDiskName": "[concat(variables('DC1vmName'),'_vmDataDisk')]",
+    //"DC1vmOSDiskName": "[concat(variables('DC1vmName'),'_vmOSDisk')]",
+    //"DC1vmDataDiskName": "[concat(variables('DC1vmName'),'_vmDataDisk')]",
     "DC1vmNicName": "NIC_vmDC1",
     "DC1PrivateIPAddress": "10.0.0.10",
 
     // DC2
     "DC2vmName": "[concat('vm', variables('Deployment'),'DC2')]",
-    "DC2vmOSDiskName": "[concat(variables('DC2vmName'),'_vmOSDisk')]",
-    "DC2vmDataDiskName": "[concat(variables('DC2vmName'),'_vmDataDisk')]",
+    //"DC2vmOSDiskName": "[concat(variables('DC2vmName'),'_vmOSDisk')]",
+    //"DC2vmDataDiskName": "[concat(variables('DC2vmName'),'_vmDataDisk')]",
     "DC2vmNicName": "NIC_vmDC2",
     "DC2PrivateIPAddress": "10.0.0.11",
-
+    
     //DSC
     "DSCArchiveFolder": "DSC",
     "DSCDC1ArchiveFileName": "DSCDC1.zip",
@@ -209,30 +206,21 @@
   },
   "resources": [
     {
-      "name": "[variables('saName')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [],
-      "tags": {
-        "displayName": "saName"
-      },
-      "properties": {
-        "accountType": "[parameters('vmStorageAccountType')]"
-      }
-    },
-    {
       "name": "[variables('asName')]",
       "type": "Microsoft.Compute/availabilitySets",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
       "dependsOn": [],
+      "sku": {
+        "name": "Aligned"
+      },
       "tags": {
         "displayName": "availabilitySet"
       },
       "properties": {
         "platformUpdateDomainCount": 5,
         "platformFaultDomainCount": 3
+
       }
     },
     // DC1 NIC
@@ -291,16 +279,13 @@
         ]
       }
     },
-    // MSX NIC
-    // MTX NIC
     // DC1 VM
     {
       "name": "[variables('DC1vmName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('saName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('DC1vmNicName'))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('asName'))]"
       ],
@@ -329,24 +314,22 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[variables('DC1vmOSDiskName')]",
-            "vhd": {
-              "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC1vmOSDiskName'), '.vhd')]"
-            },
+            "osType": "Windows",
             "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[parameters('vmStorageAccountType')]"
+            }
           },
           "dataDisks": [
             {
-              "name": "[variables('DC1vmDataDiskName')]",
               "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC1vmDataDiskName'), '.vhd')]"
-              },
               "caching": "None",
               "diskSizeGB": "127",
-              "createOption": "Empty"
-
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "[parameters('vmStorageAccountType')]"
+              }
             }
           ]
         },
@@ -409,9 +392,8 @@
       "name": "[variables('DC2vmName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('saName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('DC2vmNicName'))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('asName'))]"
       ],
@@ -439,23 +421,22 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[variables('DC2vmOSDiskName')]",
-            "vhd": {
-              "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC2vmOSDiskName'), '.vhd')]"
-            },
+            "osType": "Windows",
             "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[parameters('vmStorageAccountType')]"
+            }
           },
           "dataDisks": [
             {
-              "name": "[variables('DC2vmDataDiskName')]",
               "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://', variables('saName'), '.blob.core.windows.net/', variables('vmStorageContainerName'), '/', variables('DC2vmDataDiskName'), '.vhd')]"
-              },
               "caching": "None",
               "diskSizeGB": "127",
-              "createOption": "Empty"
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "[parameters('vmStorageAccountType')]"
+              }
             }
           ]
         },
