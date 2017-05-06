@@ -1,5 +1,3 @@
-#$Cred = get-credential LocalAdmin
-
 Configuration Main
 {
 Param ( 
@@ -179,12 +177,19 @@ node $AllNodes.NodeName
 
 	#-----------------------------------------------------------------------------------------------------------------------------
 
-    #To clean up resource names use a regular expression to remove spaces, slashes an colons
-    $StringFilter = "\\|\s|:",''
+    #To clean up resource names use a regular expression to remove spaces, slashes an colons Etc.
+    $StringFilter = "\\|\s|:|\[|\]|\(|\)|\-",''
     
     $user = $Node.StorageAccountName
-    write-verbose -Message "User is: [$user]"
-    $StorageCred = [pscredential]::new( $user , (ConvertTo-SecureString -String $StorageAccountKeySource -AsPlainText -Force))
+    if ($User)
+    {
+        Write-Verbose -Message "User is: [$user]"
+        $StorageCred = [pscredential]::new( $user , (ConvertTo-SecureString -String $StorageAccountKeySource -AsPlainText -Force))
+    else
+    {
+        Write-Warning -Message "Add the Key [StorageAccountName] to your configurationData"
+    }
+
     
     #Set environment path variables
 
@@ -414,9 +419,9 @@ node $AllNodes.NodeName
 
 
 break
-
-
-
+# used for troubleshooting
+# F5 loads the script
+# or for local debugging or deployments.
 
 $SAK = read-host enterstorageaccountkey
     
@@ -429,8 +434,7 @@ main -ConfigurationData .\JMP-ConfigurationData.psd1 -AdminCreds $cred -Verbose 
 Set-DscLocalConfigurationManager -Path .\Main -Force 
 Start-DscConfiguration -Path .\Main -Wait -Verbose -Force
 
-# used for troubleshooting
-# F5 loads the script
+
 
 break
 $a = Read-Host -AsSecureString
