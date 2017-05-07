@@ -42,7 +42,7 @@
 
 3. JSON Parameter Allowed Values ensure that we have a validated set of values for any parameter
 
-		E.g. vmStorageAccountType = "Standard_LRS","Standard_ZRS","Standard_GRS","Standard_RAGRS","Premium_LRS"
+		E.g. vmStorageAccountType = "Standard_LRS","Premium_LRS"
 		E.g. vmDomainName         = "Contoso.com","AlpineSkiHouse.com","Fabrikam.com","TreyResearch.net"
 		E.g. vmWindowsOSVersion   = "2008-R2-SP1","2012-Datacenter","2012-R2-Datacenter","2016-Datacenter"
 
