@@ -354,14 +354,14 @@
                 "script": "[variables('DSCAppRolesFileName')]",
                 "function": "Main"
               },
+              "configurationArguments": {
+                "DomainName": "[parameters('vmDomainName')]",
+                "Thumbprint": "[parameters('certificateThumbprint')]",
+                "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
+              },
               "configurationData": {
                 "url": "[concat(variables('ConfigDataPath'),variables('AppServers')[copyIndex(0)].Role,'-',variables('ConfigDataFileNameBase'))]"
               }
-            },
-            "configurationArguments": {
-              "DomainName": "[parameters('vmDomainName')]",
-              "Thumbprint": "[parameters('certificateThumbprint')]",
-              "StorageAccountKeySource": "[parameters('StorageAccountKeySource')]"
             },
             "protectedSettings": {
               "configurationArguments": {
@@ -374,7 +374,7 @@
               "configurationDataUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
             }
           }
-        },
+          },
         {
           "type": "extensions",
           "name": "OMS.Monitoring",

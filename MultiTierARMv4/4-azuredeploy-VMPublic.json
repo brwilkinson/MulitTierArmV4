@@ -157,9 +157,9 @@
         {"Role" : "TESTAGENT" }
      ],
     "AppServers":  [
-         {"VMName":"MSCONTROL01","Role":"TESTAGENT","VMSize":"Standard_DS13","Subnet":"TEST", "StorageType" : "Standard_LRS","PublicIPType": "Static"},
-          {"VMName":"NAJMP01",   "Role":"JMP",    "VMSize":"Standard_DS2_V2","Subnet":"FE", "StorageType" : "Standard_LRS","PublicIPType": "Static"},
-          {"VMName":"NAJMP02",   "Role":"JMP",    "VMSize":"Standard_DS2_V2","Subnet":"FE", "StorageType" : "Standard_LRS","PublicIPType": "Static"}
+         {"VMName":"MSCONTROL01","Role":"TESTAGENT","VMSize":"Standard_DS13","Subnet":"MT", "StorageType" : "Standard_LRS","PublicIPType": "Static"},
+         {"VMName":"NAJMP01",   "Role":"JMP",    "VMSize":"Standard_DS2_V2","Subnet":"FE", "StorageType" : "Standard_LRS","PublicIPType": "Static"},
+         {"VMName":"NAJMP02",   "Role":"JMP",    "VMSize":"Standard_DS2_V2","Subnet":"FE", "StorageType" : "Standard_LRS","PublicIPType": "Static"}
       ],
 
     // Note if the deployment is into a VNET in a different subscription or resource group, use the variable VNetID instead

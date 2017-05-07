@@ -185,7 +185,8 @@ node $AllNodes.NodeName
     {
         Write-Verbose -Message "User is: [$user]"
         $StorageCred = [pscredential]::new( $user , (ConvertTo-SecureString -String $StorageAccountKeySource -AsPlainText -Force))
-    else
+    }
+	else
     {
         Write-Warning -Message "Add the Key [StorageAccountName] to your configurationData"
     }

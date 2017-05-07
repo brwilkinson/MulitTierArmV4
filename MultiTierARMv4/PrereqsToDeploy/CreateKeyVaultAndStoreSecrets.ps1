@@ -38,3 +38,11 @@ $contosokey | select *
 
 # specific version of key
 # E.g. https://kvcontoso.vault.azure.net:443/secrets/ericlang/afa351084bba48449cc5deb984c7c4a1
+
+
+# ------- Above this line is required, below this line is optional
+# Save the storage account key in the keyvault
+$rgName = 'rgGlobal'
+$saname = 'saeastus2'
+$SS = (Get-AzureRmStorageAccountKey -ResourceGroupName $rgName -Name $saname)[1].value | ConvertTo-SecureString -AsPlainText -Force
+Set-AzureKeyVaultSecret -VaultName $kVaultName -Name StorageAccountKeySource -SecretValue $SS -ContentType txt
