@@ -13,7 +13,22 @@ Azure Resource Group Deployment - MultiTier Environment
 		1-azuredeploy-VNet.json
 		2-azuredeploy-Directory.json
 		3-azuredeploy-DataBase.json
-		4-azuredeploy-MidTier.json
-		5-azuredeploy-FrontEnd.json
+		4-azuredeploy-VMPublic.json
+		5-azuredeploy-VMPrivate.json
 		6-azuredeploy-ILBalancer.json
 		7-azuredeploy-WebAppFirewall.json
+
+```
+    "AppRoles": [
+        {"Role" : "WebFE" },
+        {"Role" : "WebMT" }
+    ],
+
+    "AppServers": [
+            {"VMName":"WebFE01","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE", "StorageType" : "Standard_LRS"},
+            {"VMName":"WebFE02","Role":"WebFE","VMSize":"Standard_DS4","Subnet":"FE", "StorageType" : "Standard_LRS"},
+            
+            {"VMName":"WebMT01","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT", "StorageType" : "Standard_LRS"},
+            {"VMName":"WebMT02","Role":"WebMT","VMSize":"Standard_DS12","Subnet":"MT", "StorageType" : "Standard_LRS"}
+      ],
+```
