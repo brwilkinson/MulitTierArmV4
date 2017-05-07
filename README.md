@@ -18,6 +18,9 @@ Azure Resource Group Deployment - MultiTier Environment
 		6-azuredeploy-ILBalancer.json
 		7-azuredeploy-WebAppFirewall.json
 
+	Define the servers you want to deploy using a table in JSON, so you can create as many as you like
+	Each server has a role that puts it in an availabilityset and also uses the role to run the DSC configuration
+	All VM's used manageddisks
 ```
     "AppRoles": [
         {"Role" : "WebFE" },
