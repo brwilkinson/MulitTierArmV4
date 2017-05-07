@@ -135,6 +135,8 @@
 		3-azuredeploy-DataBase.json
 		4-azuredeploy-MidTier.json
 		5-azuredeploy-FrontEnd.json
+		6-azuredeploy-ILBalancer.json
+		7-azuredeploy-WebAppFirewall.json
 		
 	These templates work because they all share the exact same parameters and parameters file
 	
