@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
   "parameters": {
     "DeploymentID": {
-      "value": "02"
+      "value": "03"
     },
     "vmAdminPassword": {
       "reference": {
